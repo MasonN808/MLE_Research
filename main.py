@@ -47,6 +47,17 @@ if __name__ == '__main__':
     score2 = syp.diff(lnl, theta2)
     print("Score Function wrt THETA1: " + str(score1))
     print("Score Function wrt THETA2: " + str(score2))
-    info_matrix =
-
+    info_matrix = np.matrix([[score1**2, score1*score2], [score2*score1, score2**2]])
+    print("INFO_MATRIX" + str(info_matrix))
+    print(info_matrix.shape)
+    initial = np.array([0, 0])
+    nxt = np.array([0, 0])
+    for i in np.arange(100):
+        print(i)
+        subed_matrix = np.vectorize(lambda z: z.subs({theta1: initial[0], theta2: initial[1]}))(info_matrix)
+        print(subed_matrix)
+        print(np.linalg.inv(subed_matrix))
+        nxt += initial + np.linalg.inv(subed_matrix)*np.array([score1.subs(theta1, initial[0]).subs(theta2, initial[1]), score2.subs(theta1, initial[0]).subs(theta2, initial[1])]).transpose
+        initial = nxt
+    print(nxt)
     # MLE(pdf, params, data)
