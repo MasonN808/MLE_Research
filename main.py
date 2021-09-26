@@ -23,14 +23,22 @@ class MLE:
         #     logging.warning("xdata, ndata, and ydata are not of the same size")
         self.num_data = np.arange(len(xdata))
 
-    def get_probabilities(self):
+    def get_probabilities(self) -> syp.symbols:
+        """
+        :return: Probabilities
+        :rtype: syp.symbols
+        """
         pi = []
         for i in self.num_data:
             pi.append((syp.exp(self.theta1 + self.theta2 * self.data[0][i])) / (1 + syp.exp(
                 self.theta1 + self.theta2 * self.data[0][i])))
         return pi
 
-    def get_likelihoodFn(self):
+    def get_likelihoodFn(self) -> syp.symbols:
+        """
+        :return: Likelihood Function
+        :rtype: syp.symbols
+        """
         likelihood = 1
         for i in self.num_data:
             # Compute the likelihood function
@@ -39,23 +47,40 @@ class MLE:
                     self.data[2][i] - self.data[1][i])
         return likelihood
 
-    def get_logLikelihoodFn(self):
+    def get_logLikelihoodFn(self) -> syp.symbols:
+        """
+        :return: The Log-likelihood Function
+        :rtype: syp.symbols
+        """
         lnl = syp.ln(self.get_likelihoodFn())
         return lnl
 
-    def get_score1(self):
+    def get_score1(self) -> syp.symbols:
+        """
+        :return: Score Function 2
+        :rtype: syp.symbols
+        """
         score1 = syp.diff(self.get_logLikelihoodFn(), self.theta1)
         return score1
 
-    def get_score2(self):
+    def get_score2(self) -> syp.symbols:
+        """
+
+        :return: Score Function 2
+        :rtype: syp.symbols
+        """
         score2 = syp.diff(self.get_logLikelihoodFn(), self.theta2)
         return score2
 
-    def get_infoMatrix(self):
+    def get_infoMatrix(self) -> syp.Matrix:
+        """
+        :return: Information Matrix / Hessian Matrix
+        :rtype: syp.Matrix
+        """
         info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.params))
         return info_matrix
 
-    def newtowns_method(self):
+    def newtowns_method(self) -> []:
         initial = [0, 0]
         nxt = None
         for i in np.arange(self.iterations):
