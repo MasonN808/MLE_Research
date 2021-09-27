@@ -2,7 +2,11 @@
 from math import comb
 import logging
 import numpy as np
+import pandas
 import sympy as syp
+import pandas as pd
+from rdatasets import data
+import statsmodels.api as sm
 from math import factorial
 
 
@@ -19,8 +23,8 @@ class MLE:
         self.x = syp.Symbol("x")
         self.y = syp.Symbol("y")
         self.params = [self.theta1, self.theta2]
-        # if xdata.size != ndata.size != ydata.size:
-        #     logging.warning("xdata, ndata, and ydata are not of the same size")
+        if len(xdata) != len(ndata) != len(ydata):
+            logging.warning("xdata, ndata, and ydata are not of the same size")
         self.num_data = np.arange(len(xdata))
 
     def get_probabilities(self) -> syp.symbols:
@@ -43,8 +47,8 @@ class MLE:
         for i in self.num_data:
             # Compute the likelihood function
             likelihood *= comb(self.data[2][i], self.data[1][i]) * (
-                        self.get_probabilities()[i] ** self.data[1][i]) * (1 - self.get_probabilities()[i]) ** (
-                    self.data[2][i] - self.data[1][i])
+                    self.get_probabilities()[i] ** self.data[1][i]) * (1 - self.get_probabilities()[i]) ** (
+                                  self.data[2][i] - self.data[1][i])
         return likelihood
 
     def get_logLikelihoodFn(self) -> syp.symbols:
@@ -52,7 +56,7 @@ class MLE:
         :return: The Log-likelihood Function
         :rtype: syp.symbols
         """
-        lnl = syp.ln(self.get_likelihoodFn())
+        lnl = syp.log(self.get_likelihoodFn())
         return lnl
 
     def get_score1(self) -> syp.symbols:
@@ -77,7 +81,7 @@ class MLE:
         :return: Information Matrix / Hessian Matrix
         :rtype: syp.Matrix
         """
-        #Another way to get Hessian
+        # Another way to get Hessian
         # info_matrix = (syp.derive_by_array(syp.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
         info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.params))
         return info_matrix
@@ -90,135 +94,35 @@ class MLE:
             # information matrix subbed in with values for theta1 and theta2, then converted to float for consistency
             # subed_info_matrix = np.vectorize(lambda z: z.subs({theta1: initial[0], theta2: initial[1]}))(
             #     info_matrix).astype(dtype=np.float64)
-            subed_info_matrix = np.matrix(self.get_infoMatrix().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]))
+            subed_info_matrix = np.matrix(
+                self.get_infoMatrix().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]))
             scores_array = [self.get_score1().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]),
                             self.get_score2().subs(self.theta1, initial[0]).subs(self.theta2, initial[1])]
             # scores_array_transpose = np.transpose(scores_array)
-            nxt = initial + np.dot(np.linalg.inv(subed_info_matrix.astype(dtype=np.float64)), scores_array)
+            nxt = initial - np.dot(np.linalg.inv(subed_info_matrix.astype(dtype=np.float64)), scores_array)
             # Convert matrix to array with two elements
             nxt = np.asarray(nxt).flatten()
             initial = nxt
             print(initial)
         return initial
 
-
-# def comb(n, k):
-#     return factorial(n) / factorial(k) / factorial(n - k)
-class MLE2:
-
-    def __init__(self, data: np.array, iterations: int):
-        self.iterations = iterations
-        self.data = data
-        xdata = data[0]
-        ydata = data[1]
-        ndata = data[2]
-        self.theta1 = syp.Symbol("theta1")
-        self.theta2 = syp.Symbol("theta2")
-        self.x = syp.Symbol("x")
-        self.y = syp.Symbol("y")
-        self.n = syp.Symbol("n")
-        self.params = [self.theta1, self.theta2]
-        # if xdata.size != ndata.size != ydata.size:
-        #     logging.warning("xdata, ndata, and ydata are not of the same size")
-        self.num_data = np.arange(len(xdata))
-
-    def get_probabilities(self) -> syp.symbols:
-        """
-        :return: Probabilities
-        :rtype: syp.symbols
-        """
-        pi = (syp.exp(self.theta1 + self.theta2 * self.x)) / (1 + syp.exp(
-            self.theta1 + self.theta2 * self.x))
-        return pi
-
-    def get_likelihoodFn(self) -> syp.symbols:
-        """
-        :return: Likelihood Function
-        :rtype: syp.symbols
-        """
-        # Compute the likelihood function
-        likelihood = comb(self.n, self.y) * (
-                    self.get_probabilities() ** self.y) * (1 - self.get_probabilities()) ** (
-                self.n - self.y)
-        return likelihood
-
-    def get_logLikelihoodFn(self) -> syp.symbols:
-        """
-        :return: The Log-likelihood Function
-        :rtype: syp.symbols
-        """
-        lnl = syp.ln(self.get_likelihoodFn())
-        return lnl
-
-    def get_score1(self) -> syp.symbols:
-        """
-        :return: Score Function 2
-        :rtype: syp.symbols
-        """
-        score1 = syp.diff(self.get_logLikelihoodFn(), self.theta1)
-        return score1
-
-    def get_score2(self) -> syp.symbols:
-        """
-
-        :return: Score Function 2
-        :rtype: syp.symbols
-        """
-        score2 = syp.diff(self.get_logLikelihoodFn(), self.theta2)
-        return score2
-
-    def get_infoMatrix(self) -> syp.Matrix:
-        """
-        :return: Information Matrix / Hessian Matrix
-        :rtype: syp.Matrix
-        """
-        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.params))
-        return info_matrix
-
-    def newtowns_method(self) -> []:
-        initial = [0, 0]
-        nxt = None
-
-        for i in np.arange(self.iterations):
-            print(i)
-            # information matrix subbed in with values for theta1 and theta2, then converted to float for consistency
-            # subed_info_matrix = np.vectorize(lambda z: z.subs({theta1: initial[0], theta2: initial[1]}))(
-            #     info_matrix).astype(dtype=np.float64)
-            subed_info_matrix = np.matrix(self.get_infoMatrix().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]).subs(self.x, ))
-            scores_array = [self.get_score1().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]),
-                            self.get_score2().subs(self.theta1, initial[0]).subs(self.theta2, initial[1])]
-            # scores_array_transpose = np.transpose(scores_array)
-            nxt = initial + np.dot(np.linalg.inv(subed_info_matrix.astype(dtype=np.float64)), scores_array)
-            # Convert matrix to array with two elements
-            nxt = np.asarray(nxt).flatten()
-            initial = nxt
-            print(initial)
-        return initial
-
-
-# def comb(n, k):
-#     return factorial(n) / factorial(k) / factorial(n - k)
 
 if __name__ == '__main__':
-    xdata = [1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839]
-    ydata = [6, 13, 18, 28, 52, 53, 61, 60]
-    ndata = [59, 60, 62, 56, 63, 59, 62, 60]
-    data = [xdata, ydata, ndata]
-    model = MLE(data = data, iterations = 100)
+
+    # xdata = [1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839]
+    # ydata = [6, 13, 18, 28, 52, 53, 61, 60]
+    # ndata = [59, 60, 62, 56, 63, 59, 62, 60]
+    # data = [xdata, ydata, ndata]
+    # data = sm.datasets.get_rdataset("Default", "ISLR")
+
+    # Import Default dataset with pandas from downloaded csv file from R
+    df = pd.read_csv(r'C:/Users/Mason/Desktop/Default.csv')
+    df = df[["balance", "income"]]
+    print(df)
+
+    model = MLE(data=data, iterations=100)
     print(model.get_probabilities())
     print(model.newtowns_method())
-
-
-
-
-
-
-
-
-
-
-
-
 
     # xdata = [1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839]
     # ydata = [6, 13, 18, 28, 52, 53, 61, 60]
