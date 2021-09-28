@@ -118,9 +118,11 @@ if __name__ == '__main__':
     # Import Default dataset with pandas from downloaded csv file from R
     df = pd.read_csv(r'C:/Users/Mason/Desktop/Default.csv')
     df = df[["balance", "income"]]
+    df["instances"] = np.ones(len(df.index))
     print(df)
+    print(df["income"].dtype)
 
-    model = MLE(data=data, iterations=100)
+    model = MLE(data=df, iterations=100)
     print(model.get_probabilities())
     print(model.newtowns_method())
 
