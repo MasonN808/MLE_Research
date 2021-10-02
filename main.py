@@ -109,30 +109,33 @@ class MLE:
 
 class MLE_2:
 
-    def __init__(self, data: np.array, iterations: int):
+    def __init__(self, data: pandas.DataFrame, iterations: int):
         self.iterations = iterations
         self.data = data
         self.thetas = [syp.Symbol("theta0")]
         self.symbols = []
         # -1 indicates not including the n data/instances
-        for i in len(data)-1:
+        # if len(data)
+        for i in range(len(data.columns)-1):
             # thetas/parameters/weights
             self.thetas.append(syp.Symbol("theta{}".format(i+1)))
-            if i < len(data)-2:
+            if i < len(data)-3:
                 # variables used as predictors
                 self.symbols.append(syp.Symbol("x{}".format(i)))
             else:
                 # variable to predict
                 self.symbols.append(syp.Symbol("y"))
+        # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
+        self.xSymbols = self.symbols[0:len(self.symbols)-1].insert(0, 1)
         self.theta1 = syp.Symbol("theta1")
         self.theta2 = syp.Symbol("theta2")
         self.x = syp.Symbol("x")
         self.y = syp.Symbol("y")
         self.params = [self.theta1, self.theta2]
-        if len(data[0]) != len(data[1]) != len(data[2]):
-            logging.warning("xdata, ndata, and ydata are not of the same size")
+        # if len(data[0]) != len(data[1]) != len(data[2]):
+        #     logging.warning("xdata, ndata, and ydata are not of the same size")
         # data/rows
-        self.num_data = np.arange(len(data[0]))
+        # self.num_data = np.arange(len(data[0]))
 
     def get_probabilities(self) -> syp.symbols:
         """
@@ -140,8 +143,8 @@ class MLE_2:
         :rtype: syp.symbols
         """
         pi = []
-        for i in self.num_data:
-            pi.append((syp.exp(self.theta1 + self.theta2 * self.data[0][i])) / (1 + syp.exp(self.theta1 + self.theta2 * self.data[0][i])))
+        exponents = np.dot(self.thetas, self.xSymbols)
+        pi.append((syp.exp(exponents)) / (1 + syp.exp(exponents)))
         return pi
 
     def get_likelihoodFn(self) -> syp.symbols:
@@ -230,7 +233,8 @@ if __name__ == '__main__':
     df = df[["income", "default", "instances"]]
     print(df)
     # print(df["income"].dtype)
-
-    model = MLE(data=df, iterations=100)
+    model = MLE_2(data=df, iterations=100)
+    print(model.symbols)
+    print(model.thetas)
     print(model.get_probabilities())
-    print(model.newtowns_method())
+    # print(model.newtowns_method())
