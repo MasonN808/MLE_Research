@@ -116,22 +116,22 @@ class MLE_2:
         self.symbols = []
         # -1 indicates not including the n data/instances
         # if len(data)
-        for i in range(len(data.columns)-1):
+        for i in range(0, len(self.data.columns)-1):
             # thetas/parameters/weights
             self.thetas.append(syp.Symbol("theta{}".format(i+1)))
-            if i < len(data)-3:
+            if i < len(self.data.columns):
                 # variables used as predictors
                 self.symbols.append(syp.Symbol("x{}".format(i)))
-            else:
-                # variable to predict
-                self.symbols.append(syp.Symbol("y"))
+        # variable to predict
+        self.xSymbols = self.symbols
+        self.symbols.append(syp.Symbol("y"))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
-        self.xSymbols = self.symbols[0:len(self.symbols)-1].insert(0, 1)
-        self.theta1 = syp.Symbol("theta1")
-        self.theta2 = syp.Symbol("theta2")
-        self.x = syp.Symbol("x")
-        self.y = syp.Symbol("y")
-        self.params = [self.theta1, self.theta2]
+        self.xSymbols.insert(0, 1)
+        # self.theta1 = syp.Symbol("theta1")
+        # self.theta2 = syp.Symbol("theta2")
+        # self.x = syp.Symbol("x")
+        # self.y = syp.Symbol("y")
+        # self.params = [self.theta1, self.theta2]
         # if len(data[0]) != len(data[1]) != len(data[2]):
         #     logging.warning("xdata, ndata, and ydata are not of the same size")
         # data/rows
@@ -234,6 +234,7 @@ if __name__ == '__main__':
     print(df)
     # print(df["income"].dtype)
     model = MLE_2(data=df, iterations=100)
+    print(model.xSymbols)
     print(model.symbols)
     print(model.thetas)
     print(model.get_probabilities())
