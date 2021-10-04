@@ -119,11 +119,11 @@ class MLE_2:
         for i in range(0, len(self.data.columns)-1):
             # thetas/parameters/weights
             self.thetas.append(syp.Symbol("theta{}".format(i+1)))
-            if i < len(self.data.columns):
-                # variables used as predictors
-                self.symbols.append(syp.Symbol("x{}".format(i)))
+            self.symbols.append(syp.Symbol("x{}".format(i)))
+        self.xSymbols = self.symbols[:]
+        # instances
+        self.symbols.append(syp.Symbol("n"))
         # variable to predict
-        self.xSymbols = self.symbols
         self.symbols.append(syp.Symbol("y"))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
         self.xSymbols.insert(0, 1)
@@ -155,9 +155,9 @@ class MLE_2:
         likelihood = 1
         for i in self.num_data:
             # Compute the likelihood function
-            likelihood *= comb(self.data[2][i], self.data[1][i]) * (
-                    self.get_probabilities()[i] ** self.data[1][i]) * (1 - self.get_probabilities()[i]) ** (
-                                  self.data[2][i] - self.data[1][i])
+            likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
+                    self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
+                                  self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
         return likelihood
 
     def get_logLikelihoodFn(self) -> syp.symbols:
@@ -237,5 +237,6 @@ if __name__ == '__main__':
     print(model.xSymbols)
     print(model.symbols)
     print(model.thetas)
-    print(model.get_probabilities())
+    print("PROBABILITIES: " + str(model.get_probabilities()))
+    print("LIKELIHOOD: " + str(model.get_likelihoodFn()))
     # print(model.newtowns_method())
