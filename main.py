@@ -110,43 +110,41 @@ class MLE:
 class MLE_2:
 
     def __init__(self, data: pandas.DataFrame, iterations: int):
-        self.i = syp.Symbol('i', integer=True)
         self.iterations = iterations
         self.data = data
         self.thetas = [syp.Symbol("theta0")]
         self.symbols = []
         # -1 indicates not including the n data/instances
         # if len(data)
-        for k in range(0, len(self.data.columns)-1):
+        for i in range(0, len(self.data.columns)-1):
             # thetas/parameters/weights
-            self.thetas.append(syp.Symbol("theta{}".format(k+1)))
-            # self.symbols.append(syp.Symbol("x{}".format(i)))
-            self.symbols.append(syp.Indexed('x', self.i))
+            self.thetas.append(syp.Symbol("theta{}".format(i+1)))
+            self.symbols.append(syp.Symbol("x{}".format(i)))
         self.xSymbols = self.symbols[:]
         # instances
-        self.symbols.append(syp.Indexed("n", self.i))
+        self.symbols.append(syp.Symbol("n"))
         # variable to predict
-        self.symbols.append(syp.Indexed("y"), self.i)
+        self.symbols.append(syp.Symbol("y"))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
         self.xSymbols.insert(0, 1)
+        # self.theta1 = syp.Symbol("theta1")
+        # self.theta2 = syp.Symbol("theta2")
+        # self.x = syp.Symbol("x")
+        # self.y = syp.Symbol("y")
+        # self.params = [self.theta1, self.theta2]
+        # if len(data[0]) != len(data[1]) != len(data[2]):
+        #     logging.warning("xdata, ndata, and ydata are not of the same size")
+        # data/rows
+        # self.num_data = np.arange(len(data[0]))
 
     def get_probabilities(self) -> syp.symbols:
         """
         :return: Probabilities
         :rtype: syp.symbols
         """
-        # pi = []
-        #
+        pi = []
         exponents = np.dot(self.thetas, self.xSymbols)
-        #
-        # x_sequence = syp.Sum(self.xSymbols)
-        # pi.append((syp.exp(exponents)) / (1 + syp.exp(exponents)))
-
-
-        init_pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
-        # i = syp.Symbol('i', integer=True)
-        pi = syp.Indexed('pi', self.i)
-
+        pi.append((syp.exp(exponents)) / (1 + syp.exp(exponents)))
         return pi
 
     def get_likelihoodFn(self) -> syp.symbols:
@@ -155,20 +153,11 @@ class MLE_2:
         :rtype: syp.symbols
         """
         likelihood = 1
-        a_seq = [-1, 3, 23, 8]
-        n, r = sympy.symbols('n, r')
-        a_n = sympy.Function('a')(n)
-        terms = 4
-        short_expr = sympy.Sum(a_n * r ** n, (n, 0, terms - 1))
-        coeffed_short_expr = short_expr.doit().subs(
-            (a_n.subs(n, i), a_seq[i]) for i in range(terms))  # 8*r**3 + 23*r**2 + 3*r - 1
-        func_short_expr = sympy.lambdify(r, coeffed_short_expr, 'numpy')
-
-        # Compute the likelihood function
-        likelihood - syp.Product(a_n * r ** n, (n, 0, terms - 1))
-        likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
-                self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
-                              self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
+        for i in self.num_data:
+            # Compute the likelihood function
+            likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
+                    self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
+                                  self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
         return likelihood
 
     def get_logLikelihoodFn(self) -> syp.symbols:
