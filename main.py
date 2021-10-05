@@ -121,14 +121,20 @@ class MLE_2:
             # thetas/parameters/weights
             self.thetas.append(syp.Symbol("theta{}".format(k+1)))
             # self.symbols.append(syp.Symbol("x{}".format(i)))
-            self.symbols.append(syp.Indexed('x', self.i))
+            self.symbols.append(syp.Indexed('x{}'.format(k), self.i))
         self.xSymbols = self.symbols[:]
         # instances
         self.symbols.append(syp.Indexed("n", self.i))
         # variable to predict
-        self.symbols.append(syp.Indexed("y"), self.i)
+        self.symbols.append(syp.Indexed("y", self.i))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
         self.xSymbols.insert(0, 1)
+        # get the number of rows/data
+        self.terms = len(data.index)
+        self.indexed_data = []
+        for k in range(0, len(self.data.columns)):
+            temp_data = data.columns[k]
+            self.indexed_data.append(lambda index: temp_data[index])
 
     def get_probabilities(self) -> syp.symbols:
         """
@@ -145,8 +151,9 @@ class MLE_2:
 
         init_pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
         # i = syp.Symbol('i', integer=True)
-        pi = syp.Indexed('pi', self.i)
-
+        # pi = syp.Indexed('pi', self.i)
+        pi = init_pi
+        # pi = lambda x: syp.Subs(init_pi.doit(), [init_pi.function.subs(self.xSymbols, j) for j in range(s.limits[0][1], s.limits[0][2] + 1)], x).doit()
         return pi
 
     def get_likelihoodFn(self) -> syp.symbols:
@@ -155,20 +162,21 @@ class MLE_2:
         :rtype: syp.symbols
         """
         likelihood = 1
-        a_seq = [-1, 3, 23, 8]
-        n, r = sympy.symbols('n, r')
-        a_n = sympy.Function('a')(n)
-        terms = 4
-        short_expr = sympy.Sum(a_n * r ** n, (n, 0, terms - 1))
-        coeffed_short_expr = short_expr.doit().subs(
-            (a_n.subs(n, i), a_seq[i]) for i in range(terms))  # 8*r**3 + 23*r**2 + 3*r - 1
-        func_short_expr = sympy.lambdify(r, coeffed_short_expr, 'numpy')
+        # a_seq = [-1, 3, 23, 8]
+        # n, r = sympy.symbols('n, r')
+        # a_n = sympy.Function('a')(n)
+        # terms = 4
+        # short_expr = sympy.Sum(a_n * r ** n, (n, 0, terms - 1))
+        # coeffed_short_expr = short_expr.doit().subs(
+        #     (a_n.subs(n, i), a_seq[i]) for i in range(terms))  # 8*r**3 + 23*r**2 + 3*r - 1
+        # func_short_expr = sympy.lambdify(r, coeffed_short_expr, 'numpy')
 
-        # Compute the likelihood function
-        likelihood - syp.Product(a_n * r ** n, (n, 0, terms - 1))
-        likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
-                self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
-                              self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
+        # Compute the likelihood function with out the combination --- syp.functions.combinatorial.nC(self.symbols[len(self.symbols)-1], self.symbols[len(self.symbols)-2])
+        likelihood = syp.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
+                              self.symbols[len(self.symbols)-1] - self.symbols[len(self.symbols)-2]), (self.i, 0, self.terms - 1))
+        # likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
+        #         self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
+        #                       self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
         return likelihood
 
     def get_logLikelihoodFn(self) -> syp.symbols:
@@ -179,22 +187,11 @@ class MLE_2:
         lnl = syp.log(self.get_likelihoodFn())
         return lnl
 
-    def get_score1(self) -> syp.symbols:
-        """
-        :return: Score Function 2
-        :rtype: syp.symbols
-        """
-        score1 = syp.diff(self.get_logLikelihoodFn(), self.theta1)
-        return score1
-
-    def get_score2(self) -> syp.symbols:
-        """
-
-        :return: Score Function 2
-        :rtype: syp.symbols
-        """
-        score2 = syp.diff(self.get_logLikelihoodFn(), self.theta2)
-        return score2
+    def get_scores(self):
+        scores = []
+        for k in self.thetas:
+            scores.append(syp.diff(self.get_logLikelihoodFn(), k))
+        return scores
 
     def get_infoMatrix(self) -> syp.Matrix:
         """
@@ -203,22 +200,30 @@ class MLE_2:
         """
         # Another way to get Hessian
         # info_matrix = (syp.derive_by_array(syp.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
-        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.params))
+        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.thetas))
         return info_matrix
 
     def newtowns_method(self) -> []:
-        initial = [0, 0]
+        initial = [0, 0, 0]
         nxt = None
         for i in np.arange(self.iterations):
             print(i)
             # information matrix subbed in with values for theta1 and theta2, then converted to float for consistency
             # subed_info_matrix = np.vectorize(lambda z: z.subs({theta1: initial[0], theta2: initial[1]}))(
             #     info_matrix).astype(dtype=np.float64)
+            # subbed_thetas = []
+            # for k in range(len(self.thetas)):
+            #     subbed_thetas.append(self.thetas[k]: initial[k])
+
             subed_info_matrix = np.matrix(
-                self.get_infoMatrix().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]))
-            scores_array = [self.get_score1().subs(self.theta1, initial[0]).subs(self.theta2, initial[1]),
-                            self.get_score2().subs(self.theta1, initial[0]).subs(self.theta2, initial[1])]
+                self.get_infoMatrix().subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
+                    self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
+            scores_array = []
+            for l in range(len(self.get_scores()) - 1):
+                scores_array.append(self.get_scores()[l].subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
+                    self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
             # scores_array_transpose = np.transpose(scores_array)
+            print(str(scores_array))
             nxt = initial - np.dot(np.linalg.inv(subed_info_matrix.astype(dtype=np.float64)), scores_array)
             # Convert matrix to array with two elements
             nxt = np.asarray(nxt).flatten()
@@ -248,6 +253,12 @@ if __name__ == '__main__':
     print(model.xSymbols)
     print(model.symbols)
     print(model.thetas)
+    print(model.indexed_data)
     print("PROBABILITIES: " + str(model.get_probabilities()))
     print("LIKELIHOOD: " + str(model.get_likelihoodFn()))
+    print("LOG - LIKELIHOOD: " + str(model.get_logLikelihoodFn()))
+    print("SCORES: " + str(model.get_scores()))
+    print("INFORMATION MATRIX: " + str(model.get_infoMatrix()))
+    print("NEWTONS METHOD: " + str(model.newtowns_method()))
+
     # print(model.newtowns_method())
