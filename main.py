@@ -118,7 +118,7 @@ class MLE_2:
         # -1 indicates not including the n data/instances
         # if len(data)
         for k in range(0, len(self.data.columns)-1):
-            # thetas/parameters/weights
+            # thetas/parameters/weight
             self.thetas.append(syp.Symbol("theta{}".format(k+1)))
             # self.symbols.append(syp.Symbol("x{}".format(i)))
             self.symbols.append(syp.Indexed('x{}'.format(k), self.i))
@@ -219,6 +219,7 @@ class MLE_2:
                 self.get_infoMatrix().subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
                     self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
             scores_array = []
+            print(str(subed_info_matrix))
             for l in range(len(self.get_scores()) - 1):
                 scores_array.append(self.get_scores()[l].subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
                     self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
