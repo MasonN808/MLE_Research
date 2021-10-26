@@ -258,28 +258,18 @@ class MLE_3:
         # get the number of rows/data
         self.terms = len(data.index)
         self.indexed_data = []
-        for k in range(0, len(self.data.columns)):
-            temp_data = data.columns[k]
-            self.indexed_data.append(lambda index: temp_data[index])
+        #
+        for k in self.data.columns:
+            temp_data = data[k]
+            self.indexed_data.append(temp_data)
 
     def get_probabilities(self) -> syp.symbols:
         """
         :return: Probabilities
         :rtype: syp.symbols
         """
-        # pi = []
-        #
         exponents = np.dot(self.thetas, self.xSymbols)
-        #
-        # x_sequence = syp.Sum(self.xSymbols)
-        # pi.append((syp.exp(exponents)) / (1 + syp.exp(exponents)))
-
-
-        init_pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
-        # i = syp.Symbol('i', integer=True)
-        # pi = syp.Indexed('pi', self.i)
-        pi = init_pi
-        # pi = lambda x: syp.Subs(init_pi.doit(), [init_pi.function.subs(self.xSymbols, j) for j in range(s.limits[0][1], s.limits[0][2] + 1)], x).doit()
+        pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
         return pi
 
     def get_likelihoodFn(self) -> syp.symbols:
@@ -287,22 +277,8 @@ class MLE_3:
         :return: Likelihood Function
         :rtype: syp.symbols
         """
-        likelihood = 1
-        # a_seq = [-1, 3, 23, 8]
-        # n, r = sympy.symbols('n, r')
-        # a_n = sympy.Function('a')(n)
-        # terms = 4
-        # short_expr = sympy.Sum(a_n * r ** n, (n, 0, terms - 1))
-        # coeffed_short_expr = short_expr.doit().subs(
-        #     (a_n.subs(n, i), a_seq[i]) for i in range(terms))  # 8*r**3 + 23*r**2 + 3*r - 1
-        # func_short_expr = sympy.lambdify(r, coeffed_short_expr, 'numpy')
-
-        # Compute the likelihood function with out the combination --- syp.functions.combinatorial.nC(self.symbols[len(self.symbols)-1], self.symbols[len(self.symbols)-2])
         likelihood = syp.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
                               self.symbols[len(self.symbols)-1] - self.symbols[len(self.symbols)-2]), (self.i, 0, self.terms - 1))
-        # likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
-        #         self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
-        #                       self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
         return likelihood
 
     def get_logLikelihoodFn(self) -> syp.symbols:
@@ -314,9 +290,11 @@ class MLE_3:
         return lnl
 
     def get_scores(self):
-        scores = []
-        for k in self.thetas:
-            scores.append(syp.diff(self.get_logLikelihoodFn(), k))
+        # derive_by_array returns a gradient matrix for multivariable function
+        scores = syp.derive_by_array(self.get_logLikelihoodFn(), self.thetas)
+        # scores = []
+        # for theta in self.thetas:
+        #     scores.append(syp.diff(self.get_logLikelihoodFn(), theta))
         return scores
 
     def get_infoMatrix(self) -> syp.Matrix:
@@ -324,36 +302,35 @@ class MLE_3:
         :return: Information Matrix / Hessian Matrix
         :rtype: syp.Matrix
         """
-        # Another way to get Hessian
-        # info_matrix = (syp.derive_by_array(syp.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
+        # derive_by_array returns a Hessian matrix for multivariable function
         info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.thetas))
         return info_matrix
 
     def newtowns_method(self) -> []:
-        initial = [0, 0, 0]
-        nxt = None
+        initial = np.zeros(3)
         for i in np.arange(self.iterations):
             print(i)
-            # information matrix subbed in with values for theta1 and theta2, then converted to float for consistency
-            # subed_info_matrix = np.vectorize(lambda z: z.subs({theta1: initial[0], theta2: initial[1]}))(
-            #     info_matrix).astype(dtype=np.float64)
-            # subbed_thetas = []
-            # for k in range(len(self.thetas)):
-            #     subbed_thetas.append(self.thetas[k]: initial[k])
 
-            subed_info_matrix = np.matrix(
-                self.get_infoMatrix().subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
-                    self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
-            scores_array = []
-            print(subed_info_matrix)
-            for l in range(len(self.get_scores()) - 1):
-                scores_array.append(self.get_scores()[l].subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
-                    self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
+
+            # subed_info_matrix = np.matrix(
+            #     self.get_infoMatrix().subs({self.thetas[k]: initial[k] for k in range(len(self.thetas)-1)}).replace(
+            #         self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1))
+            # subed_info_matrix = self.get_infoMatrix().subs({self.thetas[k]: initial[k] for k in range(len(self.thetas))})
+            # for j in range(len(self.symbols) - 1):
+            #     replaced_info_matrix = subed_info_matrix.replace(self.symbols[j], self.indexed_data[j])
+
+
+            # Substitutes the thetas with initial vector
+            subed_info_matrix = np.matrix(self.get_infoMatrix().subs(zip(self.thetas, initial)))
+            print(str(subed_info_matrix))
+            # Substitutes the thetas with initial vector
+            scores_array = self.get_scores().subs(zip(self.thetas, initial))
             # scores_array_transpose = np.transpose(scores_array)
             print(str(scores_array))
             nxt = initial - np.dot(np.linalg.inv(subed_info_matrix.astype(dtype=np.float64)), scores_array)
-            # Convert matrix to array with two elements
+            # Convert matrix to array with n elements
             nxt = np.asarray(nxt).flatten()
+            # set the initial thetas as the next thetas
             initial = nxt
             print(initial)
         return initial
@@ -370,21 +347,21 @@ if __name__ == '__main__':
     df = pd.read_csv(r'C:/Users/Mason/Desktop/Default.csv')
 
     df['default'] = df['default'].map({'Yes':1, 'No':0})
-    print(df)
+    # print(df)
     df["instances"] = np.ones(len(df.index))
     df = df[["income", "default", "instances"]]
     print(df)
     # print(df["income"].dtype)
-    model = MLE_2(data=df, iterations=100)
+    model = MLE_3(data=df, iterations=100)
     print(model.xSymbols)
     print(model.symbols)
     print(model.thetas)
-    print(model.indexed_data)
+    print("INDEXED DATA 0: " + str(model.indexed_data[0]))
     print("PROBABILITIES: " + str(model.get_probabilities()))
     print("LIKELIHOOD: " + str(model.get_likelihoodFn()))
     print("LOG - LIKELIHOOD: " + str(model.get_logLikelihoodFn()))
     print("SCORES: " + str(model.get_scores()))
-    print("INFORMATION MATRIX: " + str(model.get_infoMatrix()))
+    # print("INFORMATION MATRIX: " + str(model.get_infoMatrix()))
     print("NEWTONS METHOD: " + str(model.newtowns_method()))
 
     # print(model.newtowns_method())
