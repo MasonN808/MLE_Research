@@ -321,7 +321,7 @@ class MLE_3:
 
 
             # Substitutes the thetas with initial vector
-            subed_info_matrix = np.matrix(self.get_infoMatrix().subs(zip(self.thetas, initial)))
+            subed_info_matrix = syp.Matrix(self.get_infoMatrix().subs(zip(self.thetas, initial))).doit().subs([(self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1)])
             print(str(subed_info_matrix))
             # Substitutes the thetas with initial vector
             scores_array = self.get_scores().subs(zip(self.thetas, initial))
