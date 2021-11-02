@@ -3,7 +3,7 @@ from math import comb
 import logging
 import numpy as np
 import pandas
-import sympy as syp
+import sympy as sym
 import pandas as pd
 from rdatasets import data
 import statsmodels.api as sm
@@ -18,30 +18,30 @@ class MLE:
         xdata = data[0]
         ydata = data[1]
         ndata = data[2]
-        self.theta1 = syp.Symbol("theta1")
-        self.theta2 = syp.Symbol("theta2")
-        self.x = syp.Symbol("x")
-        self.y = syp.Symbol("y")
+        self.theta1 = sym.Symbol("theta1")
+        self.theta2 = sym.Symbol("theta2")
+        self.x = sym.Symbol("x")
+        self.y = sym.Symbol("y")
         self.params = [self.theta1, self.theta2]
         if len(xdata) != len(ndata) != len(ydata):
             logging.warning("xdata, ndata, and ydata are not of the same size")
         self.num_data = np.arange(len(xdata))
 
-    def get_probabilities(self) -> syp.symbols:
+    def get_probabilities(self) -> sym.symbols:
         """
         :return: Probabilities
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
         pi = []
         for i in self.num_data:
-            pi.append((syp.exp(self.theta1 + self.theta2 * self.data[0][i])) / (1 + syp.exp(
+            pi.append((sym.exp(self.theta1 + self.theta2 * self.data[0][i])) / (1 + sym.exp(
                 self.theta1 + self.theta2 * self.data[0][i])))
         return pi
 
-    def get_likelihoodFn(self) -> syp.symbols:
+    def get_likelihoodFn(self) -> sym.symbols:
         """
         :return: Likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
         likelihood = 1
         for i in self.num_data:
@@ -51,39 +51,39 @@ class MLE:
                                   self.data[2][i] - self.data[1][i])
         return likelihood
 
-    def get_logLikelihoodFn(self) -> syp.symbols:
+    def get_logLikelihoodFn(self) -> sym.symbols:
         """
         :return: The Log-likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        lnl = syp.log(self.get_likelihoodFn())
+        lnl = sym.log(self.get_likelihoodFn())
         return lnl
 
-    def get_score1(self) -> syp.symbols:
+    def get_score1(self) -> sym.symbols:
         """
         :return: Score Function 2
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        score1 = syp.diff(self.get_logLikelihoodFn(), self.theta1)
+        score1 = sym.diff(self.get_logLikelihoodFn(), self.theta1)
         return score1
 
-    def get_score2(self) -> syp.symbols:
+    def get_score2(self) -> sym.symbols:
         """
 
         :return: Score Function 2
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        score2 = syp.diff(self.get_logLikelihoodFn(), self.theta2)
+        score2 = sym.diff(self.get_logLikelihoodFn(), self.theta2)
         return score2
 
-    def get_infoMatrix(self) -> syp.Matrix:
+    def get_infoMatrix(self) -> sym.Matrix:
         """
         :return: Information Matrix / Hessian Matrix
-        :rtype: syp.Matrix
+        :rtype: sym.Matrix
         """
         # Another way to get Hessian
-        # info_matrix = (syp.derive_by_array(syp.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
-        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.params))
+        # info_matrix = (sym.derive_by_array(sym.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
+        info_matrix = sym.Matrix(sym.hessian(self.get_logLikelihoodFn(), self.params))
         return info_matrix
 
     def newtowns_method(self) -> []:
@@ -110,23 +110,23 @@ class MLE:
 class MLE_2:
 
     def __init__(self, data: pandas.DataFrame, iterations: int):
-        self.i = syp.Symbol('i', integer=True)
+        self.i = sym.Symbol('i', integer=True)
         self.iterations = iterations
         self.data = data
-        self.thetas = [syp.Symbol("theta0")]
+        self.thetas = [sym.Symbol("theta0")]
         self.symbols = []
         # -1 indicates not including the n data/instances
         # if len(data)
         for k in range(0, len(self.data.columns)-1):
             # thetas/parameters/weight
-            self.thetas.append(syp.Symbol("theta{}".format(k+1)))
-            # self.symbols.append(syp.Symbol("x{}".format(i)))
-            self.symbols.append(syp.Indexed('x{}'.format(k), self.i))
+            self.thetas.append(sym.Symbol("theta{}".format(k+1)))
+            # self.symbols.append(sym.Symbol("x{}".format(i)))
+            self.symbols.append(sym.Indexed('x{}'.format(k), self.i))
         self.xSymbols = self.symbols[:]
         # instances
-        self.symbols.append(syp.Indexed("n", self.i))
+        self.symbols.append(sym.Indexed("n", self.i))
         # variable to predict
-        self.symbols.append(syp.Indexed("y", self.i))
+        self.symbols.append(sym.Indexed("y", self.i))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
         self.xSymbols.insert(0, 1)
         # get the number of rows/data
@@ -136,30 +136,30 @@ class MLE_2:
             temp_data = data.columns[k]
             self.indexed_data.append(lambda index: temp_data[index])
 
-    def get_probabilities(self) -> syp.symbols:
+    def get_probabilities(self) -> sym.symbols:
         """
         :return: Probabilities
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
         # pi = []
         #
         exponents = np.dot(self.thetas, self.xSymbols)
         #
-        # x_sequence = syp.Sum(self.xSymbols)
-        # pi.append((syp.exp(exponents)) / (1 + syp.exp(exponents)))
+        # x_sequence = sym.Sum(self.xSymbols)
+        # pi.append((sym.exp(exponents)) / (1 + sym.exp(exponents)))
 
 
-        init_pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
-        # i = syp.Symbol('i', integer=True)
-        # pi = syp.Indexed('pi', self.i)
+        init_pi = (sym.exp(exponents)) / (1 + sym.exp(exponents))
+        # i = sym.Symbol('i', integer=True)
+        # pi = sym.Indexed('pi', self.i)
         pi = init_pi
-        # pi = lambda x: syp.Subs(init_pi.doit(), [init_pi.function.subs(self.xSymbols, j) for j in range(s.limits[0][1], s.limits[0][2] + 1)], x).doit()
+        # pi = lambda x: sym.Subs(init_pi.doit(), [init_pi.function.subs(self.xSymbols, j) for j in range(s.limits[0][1], s.limits[0][2] + 1)], x).doit()
         return pi
 
-    def get_likelihoodFn(self) -> syp.symbols:
+    def get_likelihoodFn(self) -> sym.symbols:
         """
         :return: Likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
         likelihood = 1
         # a_seq = [-1, 3, 23, 8]
@@ -171,36 +171,36 @@ class MLE_2:
         #     (a_n.subs(n, i), a_seq[i]) for i in range(terms))  # 8*r**3 + 23*r**2 + 3*r - 1
         # func_short_expr = sympy.lambdify(r, coeffed_short_expr, 'numpy')
 
-        # Compute the likelihood function with out the combination --- syp.functions.combinatorial.nC(self.symbols[len(self.symbols)-1], self.symbols[len(self.symbols)-2])
-        likelihood = syp.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
+        # Compute the likelihood function with out the combination --- sym.functions.combinatorial.nC(self.symbols[len(self.symbols)-1], self.symbols[len(self.symbols)-2])
+        likelihood = sym.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
                               self.symbols[len(self.symbols)-1] - self.symbols[len(self.symbols)-2]), (self.i, 0, self.terms - 1))
-        # likelihood *= syp.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
+        # likelihood *= sym.nC(self.symbols[len(self.symbols)], self.symbols[len(self.symbols)-1]) * (
         #         self.get_probabilities() ** self.symbols[len(self.symbols)]) * (1 - self.get_probabilities()) ** (
         #                       self.symbols[len(self.symbols)] - self.symbols[len(self.symbols)-1])
         return likelihood
 
-    def get_logLikelihoodFn(self) -> syp.symbols:
+    def get_logLikelihoodFn(self) -> sym.symbols:
         """
         :return: The Log-likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        lnl = syp.log(self.get_likelihoodFn())
+        lnl = sym.log(self.get_likelihoodFn())
         return lnl
 
     def get_scores(self):
         scores = []
         for k in self.thetas:
-            scores.append(syp.diff(self.get_logLikelihoodFn(), k))
+            scores.append(sym.diff(self.get_logLikelihoodFn(), k))
         return scores
 
-    def get_infoMatrix(self) -> syp.Matrix:
+    def get_infoMatrix(self) -> sym.Matrix:
         """
         :return: Information Matrix / Hessian Matrix
-        :rtype: syp.Matrix
+        :rtype: sym.Matrix
         """
         # Another way to get Hessian
-        # info_matrix = (syp.derive_by_array(syp.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
-        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.thetas))
+        # info_matrix = (sym.derive_by_array(sym.derive_by_array(self.get_logLikelihoodFn(), self.params), self.params))
+        info_matrix = sym.Matrix(sym.hessian(self.get_logLikelihoodFn(), self.thetas))
         return info_matrix
 
     def newtowns_method(self) -> []:
@@ -236,23 +236,23 @@ class MLE_2:
 class MLE_3:
 
     def __init__(self, data: pandas.DataFrame, iterations: int):
-        self.i = syp.Symbol('i', integer=True)
+        self.i = sym.Symbol('i', integer=True)
         self.iterations = iterations
         self.data = data
-        self.thetas = [syp.Symbol("theta0")]
+        self.thetas = [sym.Symbol("theta0")]
         self.symbols = []
         # -1 indicates not including the n data/instances
         # if len(data)
         for k in range(0, len(self.data.columns)-1):
             # thetas/parameters/weight
-            self.thetas.append(syp.Symbol("theta{}".format(k+1)))
-            # self.symbols.append(syp.Symbol("x{}".format(i)))
-            self.symbols.append(syp.Indexed('x{}'.format(k), self.i))
+            self.thetas.append(sym.Symbol("theta{}".format(k+1)))
+            # self.symbols.append(sym.Symbol("x{}".format(i)))
+            self.symbols.append(sym.Indexed('x{}'.format(k), self.i))
         self.xSymbols = self.symbols[:]
         # instances
-        self.symbols.append(syp.Indexed("n", self.i))
+        self.symbols.append(sym.Indexed("n", self.i))
         # variable to predict
-        self.symbols.append(syp.Indexed("y", self.i))
+        self.symbols.append(sym.Indexed("y", self.i))
         # add array of just x variables (i.e. the predictor data) and add 1 to the 0th index while deleting y variable
         self.xSymbols.insert(0, 1)
         # get the number of rows/data
@@ -263,47 +263,47 @@ class MLE_3:
             temp_data = data[k]
             self.indexed_data.append(temp_data)
 
-    def get_probabilities(self) -> syp.symbols:
+    def get_probabilities(self) -> sym.symbols:
         """
         :return: Probabilities
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
         exponents = np.dot(self.thetas, self.xSymbols)
-        pi = (syp.exp(exponents)) / (1 + syp.exp(exponents))
+        pi = (sym.exp(exponents)) / (1 + sym.exp(exponents))
         return pi
 
-    def get_likelihoodFn(self) -> syp.symbols:
+    def get_likelihoodFn(self) -> sym.symbols:
         """
         :return: Likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        likelihood = syp.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
+        likelihood = sym.Product((self.get_probabilities() ** self.symbols[len(self.symbols)-1]) * (1 - self.get_probabilities()) ** (
                               self.symbols[len(self.symbols)-1] - self.symbols[len(self.symbols)-2]), (self.i, 0, self.terms - 1))
         return likelihood
 
-    def get_logLikelihoodFn(self) -> syp.symbols:
+    def get_logLikelihoodFn(self) -> sym.symbols:
         """
         :return: The Log-likelihood Function
-        :rtype: syp.symbols
+        :rtype: sym.symbols
         """
-        lnl = syp.log(self.get_likelihoodFn())
+        lnl = sym.log(self.get_likelihoodFn())
         return lnl
 
     def get_scores(self):
         # derive_by_array returns a gradient matrix for multivariable function
-        scores = syp.derive_by_array(self.get_logLikelihoodFn(), self.thetas)
+        scores = sym.derive_by_array(self.get_logLikelihoodFn(), self.thetas)
         # scores = []
         # for theta in self.thetas:
-        #     scores.append(syp.diff(self.get_logLikelihoodFn(), theta))
+        #     scores.append(sym.diff(self.get_logLikelihoodFn(), theta))
         return scores
 
-    def get_infoMatrix(self) -> syp.Matrix:
+    def get_infoMatrix(self) -> sym.Matrix:
         """
         :return: Information Matrix / Hessian Matrix
-        :rtype: syp.Matrix
+        :rtype: sym.Matrix
         """
         # derive_by_array returns a Hessian matrix for multivariable function
-        info_matrix = syp.Matrix(syp.hessian(self.get_logLikelihoodFn(), self.thetas))
+        info_matrix = sym.Matrix(sym.hessian(self.get_logLikelihoodFn(), self.thetas))
         return info_matrix
 
     def newtowns_method(self) -> []:
@@ -321,7 +321,7 @@ class MLE_3:
 
 
             # Substitutes the thetas with initial vector
-            subed_info_matrix = syp.Matrix(self.get_infoMatrix().subs(zip(self.thetas, initial))).doit().subs([(self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1)])
+            subed_info_matrix = sym.Matrix(self.get_infoMatrix().subs(zip(self.thetas, initial))).doit().subs([(self.symbols[j], self.indexed_data[j]) for j in range(len(self.symbols)-1)])
             print(str(subed_info_matrix))
             # Substitutes the thetas with initial vector
             scores_array = self.get_scores().subs(zip(self.thetas, initial))
