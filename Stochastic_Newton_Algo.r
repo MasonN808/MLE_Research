@@ -16,6 +16,6 @@ p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
 head(df)
-
+s
 stochastic_newton_algo(df, 10)
 
