@@ -1,23 +1,31 @@
 stochastic_newton_algo <- function(df, iterations = 10){
-  thetas_prev <- rep(1, ncol(df)) #initialize vector of thetas assigned 1 (This can 
+  thetas_prev <- rep(1, ncol(df)-1) #initialize vector of thetas assigned 1 (This can 
                               #be changed upon initiation) with length of 
                               #number of columns from df
   S_n_inv_prev = diag(ncol(df)-1)
-  for(i in 0:iterations){
+  for(i in 1:iterations){
     PHI <- df[i %% iterations, 0:(ncol(df)-1)] #take the ith row in df for every
                                               #instance in the sequence, if
                                               #i>iterations, use mod function
                                               #and go through df again until
                                               #termination
+    
     exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-    a_n <- PI*(1-PI)
-    print(dim(PHI))
-    print(dim(S_n_inv))
-    S_n_inv <- S_n_inv_prev - a_n*solve(1+a_n*(t(PHI) %*% S_n_inv_prev %*% PHI))*S_n_inv_prev %*%
-      PHI %*% t(PHI) %*% S_n_inv_prev
-    thetas <- thetas_prev + S_n_inv %*% PHI*(df[i %% iterations, ncol(df)] - PI)
-    thetas_prev <- thetas #unnecessary, but good for clarity
+    a_n <- drop(PI*(1-PI)) #Use drop to convert from 1x1 matrix to scalar
+
+
+    
+    S_n_inv <- S_n_inv_prev - a_n * 1/(1 + a_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
+      S_n_inv_prev %*% matrix(PHI) %*% t(PHI) %*% S_n_inv_prev
+    
+    print(dim(thetas_prev))
+    print(dim(S_n_inv %*% PHI))
+    
+    thetas <- thetas_prev + (S_n_inv %*% PHI) * drop((df[i %% iterations, ncol(df)] - PI))
+    
+    thetas_prev <- t(thetas) #unnecessary, but good for clarity
+    S_n_inv_prev <- S_n_inv
     print(thetas_prev)
   }
 
