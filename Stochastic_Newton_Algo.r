@@ -19,12 +19,15 @@ stochastic_newton_algo <- function(df, iterations = 10){
     S_n_inv <- S_n_inv_prev - a_n * 1/(1 + a_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
       S_n_inv_prev %*% matrix(PHI) %*% t(PHI) %*% S_n_inv_prev
     
-    print(dim(thetas_prev))
+    print(thetas_prev)
     print(dim(S_n_inv %*% PHI))
+    print(dim(drop((df[i %% iterations, ncol(df)] - PI))))
+    print(dim(PI))
+    print(dim(df[i %% iterations, ncol(df)]))
     
     thetas <- thetas_prev + (S_n_inv %*% PHI) * drop((df[i %% iterations, ncol(df)] - PI))
     
-    thetas_prev <- t(thetas) #unnecessary, but good for clarity
+    thetas_prev <- thetas #unnecessary, but good for clarity
     S_n_inv_prev <- S_n_inv
     print(thetas_prev)
   }
