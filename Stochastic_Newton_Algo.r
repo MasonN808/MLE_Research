@@ -1,20 +1,21 @@
-stochastic_newton_algo <- function(df, iterations = 10){
-  thetas_prev <- rep(1, ncol(df)-1) #initialize vector of thetas assigned 1 (This can 
-                              #be changed upon initiation) with length of 
-                              #number of columns from df
+stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1)){
+  #thetas_prev <- rep(1, ncol(df)-1) #initialize vector of thetas assigned 1 (This can 
+  #be changed upon initiation) with length of 
+  #number of columns from df
+  iterations = nrow(df)
   S_n_inv_prev = diag(ncol(df)-1)
   for(i in 1:iterations){
-    PHI <- df[i %% nrow(df), 0:(ncol(df)-1)] #take the ith row in df for every
-                                              #instance in the sequence, if
-                                              #i>iterations, use mod function
-                                              #and go through df again until
-                                              #termination
+    PHI <- df[i, 1:(ncol(df)-1)] #take the ith row in df for every
+    #instance in the sequence, if
+    #i>iterations, use mod function
+    #and go through df again until
+    #termination
     
     exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
     a_n <- drop(PI*(1-PI)) #Use drop to convert from 1x1 matrix to scalar
-
-
+    
+    
     
     S_n_inv <- S_n_inv_prev - a_n * 1/(1 + a_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
       S_n_inv_prev %*% matrix(PHI) %*% t(PHI) %*% S_n_inv_prev
@@ -32,11 +33,11 @@ stochastic_newton_algo <- function(df, iterations = 10){
     S_n_inv_prev <- S_n_inv
     print(thetas_prev)
   }
-
+  
 }
 
-rm(list=ls())
-library(optimx)
+#rm(list=ls())
+#library(optimx)
 #set.seed(123)
 p <- 5
 n <- 10000
@@ -48,6 +49,6 @@ p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
 head(df)
+init=betas+rnorm(p+1,0,1)
 
-stochastic_newton_algo(df, 100)
-
+stochastic_newton_algo(df,init)
