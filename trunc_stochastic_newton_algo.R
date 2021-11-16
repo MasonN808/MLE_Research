@@ -18,6 +18,7 @@ trunc_stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), C
   # assign the names vector to the column names of temp data frame
   colnames(temp_df) <- names
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
+  # ERROR: row 1 is "2" and row 2 is "21"; likely due to this line below
   temp_df <- na.omit(rbind(temp_df, thetas_prev))
   iterations = nrow(df)
   S_n_inv_prev = diag(ncol(df)-1)
