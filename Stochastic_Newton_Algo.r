@@ -1,3 +1,8 @@
+#' Implementation of the stochastic Newton algorithm
+#' 
+#' @param df A data frame.
+#' @param thetas_prev A vector of initial theta values in the Reals.
+#' @return A data frame of thetas after nrow(df) iterations.
 stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1)){
   # initialize a data frame to store thetas after every iteration
   m <- matrix(NA, ncol = ncol(df), nrow = 1)
@@ -33,9 +38,8 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1)){
   return(temp_df)
 }
 
-#rm(list=ls())
-#library(optimx)
-#set.seed(123)
+
+# Testing
 p <- 5
 n <- 10000
 x <- matrix(rnorm(n * p), n, p)
@@ -48,6 +52,4 @@ df <- cbind(x,y)
 head(df)
 init=betas+rnorm(p+1,0,1)
 
-
-# Testing
 print(head(stochastic_newton_algo(df,init)))
