@@ -2,7 +2,7 @@
 #' 
 #' @param df A data frame.
 #' @param thetas_prev A vector of initial theta values in the Reals.
-#' @param exact A vector of exact values. If NULL, error column isn't outputed
+#' @param exact A vector of exact values. If NULL, error column isn't outputted
 #' @return A data frame of thetas after nrow(df) iterations.
 stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact = NULL){
   # initialize a data frame to store thetas after every iteration
