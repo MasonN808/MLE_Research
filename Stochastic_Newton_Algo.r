@@ -2,17 +2,23 @@
 #' 
 #' @param df A data frame.
 #' @param thetas_prev A vector of initial theta values in the Reals.
-#' @param exact A vector of exact values.
+#' @param exact A vector of exact values. If NULL, error column isn't outputed
 #' @return A data frame of thetas after nrow(df) iterations.
 stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact = NULL){
   # initialize a data frame to store thetas after every iteration
-  m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
-  temp_df <- data.frame(m)
+  if (!is.null(exact)){
+    ## Add error column
+    m <- matrix(NA, ncol = ncol(df), nrow = 1)
+  }
+  else{
+    m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
+  }
+  
+  temp_df <- data.frame(m, check.names = FALSE)
   
   names <- c()
   # make a vector of names for columns
   for (i in 2:ncol(df)-2) {
-    print(i)
     names <- append(names, paste0("Theta.", i))
   }
   if (!is.null(exact)){
@@ -20,12 +26,12 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     names <- append(names, "error")
   }
   # assign the names vector to the column names of temp data frame
-  print(c(ncol(temp_df), length(names)))
+  # print(c(ncol(temp_df), length(names)))
   colnames(temp_df) <- names
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
     ## Add error
-    error = norm(thetas_prev - exact, type = "2")
+    error = Norm(thetas_prev - exact, p = 2)
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
@@ -49,7 +55,7 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     
     if (!is.null(exact)){
       ## Add error
-      error = norm(thetas_prev - exact, type = "2")
+      error = Norm(thetas_prev - exact, p = 2)
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
@@ -70,8 +76,9 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-print(head(df))
+# print(head(df))
 init=betas+rnorm(p+1,0,1)
 print(betas)
+print(init)
 
-print(head(stochastic_newton_algo(df,init)))
+print(tail(stochastic_newton_algo(df,init, betas)))
