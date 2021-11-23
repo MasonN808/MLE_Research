@@ -76,9 +76,12 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-# print(head(df))
-init=betas+rnorm(p+1,0,1)
-print(betas)
-print(init)
 
-print(tail(stochastic_newton_algo(df,init, betas)))
+init=betas+rnorm(p+1,0,1)
+
+print(init)
+library(pracma)
+print(tail(stochastic_newton_algo(df,init)))
+
+#exact values
+print(betas)
