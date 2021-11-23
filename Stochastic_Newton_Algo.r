@@ -79,7 +79,7 @@ df <- cbind(x,y)
 
 init=betas+rnorm(p+1,0,1)
 
-print(init)
+# print(init)
 library(pracma)
 print(tail(stochastic_newton_algo(df,init)))
 
