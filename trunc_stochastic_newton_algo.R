@@ -82,4 +82,4 @@ df <- cbind(x,y)
 head(df)
 init=betas+rnorm(p+1,0,1)
 
-# print(head(trunc_stochastic_newton_algo(df,init, betas, 1/4, 1/2)))
+print(head(trunc_stochastic_newton_algo(df,init, betas, 1/4, 1/2)))
