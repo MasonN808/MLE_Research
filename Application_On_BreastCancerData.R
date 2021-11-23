@@ -1,8 +1,8 @@
-# Wisconsin Breast Cancer Database
-
+# Data set from https://machinelearningmastery.com/machine-learning-datasets-in-r/
 # install.packages("mlbench")
 library(pracma)
 library(mlbench)
+# Wisconsin Breast Cancer Database
 data(BreastCancer)
 dim(BreastCancer)
 levels(BreastCancer$Class)

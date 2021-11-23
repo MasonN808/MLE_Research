@@ -24,6 +24,6 @@ df <- data.matrix(df)
 print(stochastic_newton_algo(df,init)) # Output gives lots on NaNs (could be dividing by 0?)
 
 # Apply the truncated stochastic netwon algo
-print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
+# print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
 
 
