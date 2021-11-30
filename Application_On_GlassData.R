@@ -16,7 +16,8 @@ df <- na.omit(df)
 # init = rep(.1, ncol(df))
 
 model1 <- glm(Type ~ RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = df, family = binomial)
-init = model1$coefficients + rnorm(ncol(df))
+
+# init = model1$coefficients + rnorm(ncol(df), 0, 1)
 
 df <- cbind(free = 1, df)
 # Turn df into a matrix to make compatible with algorithm

@@ -37,8 +37,10 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
   else{
     temp_df <- na.omit(rbind(temp_df, thetas_prev))
   }
+  
   iterations = nrow(df)
   S_n_inv_prev = diag(ncol(df)-1)
+  
   for(i in 1:iterations){
     PHI <- df[i, 1:(ncol(df)-1)] #take the ith row in df for every instance in the sequence
     # print(PHI)
@@ -79,7 +81,7 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-print(df)
+# print(df)
 init=betas+rnorm(p+1,0,1)
 
 # print(init)
