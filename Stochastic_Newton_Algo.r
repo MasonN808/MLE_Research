@@ -86,3 +86,4 @@ print(tail(stochastic_newton_algo(df,init)))
 
 #exact values
 print(betas)
+
