@@ -22,6 +22,7 @@ init = rep(.1, ncol(df)-1)
 
 # Turn df into a matrix to make compatible with algorithm
 df <- data.matrix(df)
+print(df)
 
 # Apply the stochastic newton algo
 print(stochastic_newton_algo(df,init)) # Output gives lots on NaNs (could be dividing by 0?)

@@ -48,7 +48,6 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     
     S_n_inv <- S_n_inv_prev - a_n * 1/(1 + a_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
       S_n_inv_prev %*% matrix(PHI) %*% t(PHI) %*% S_n_inv_prev
-    print(S_n_inv)
     
     thetas <- thetas_prev + (S_n_inv %*% PHI) * drop((df[i %% nrow(df), ncol(df)] - PI))
     
