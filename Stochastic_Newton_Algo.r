@@ -41,9 +41,12 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
   S_n_inv_prev = diag(ncol(df)-1)
   for(i in 1:iterations){
     PHI <- df[i, 1:(ncol(df)-1)] #take the ith row in df for every instance in the sequence
+    # print(PHI)
     exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+    # print(PI)
     a_n <- drop(PI*(1-PI)) #Use drop to convert from 1x1 matrix to scalar
+    # print(a_n)
 
     
     S_n_inv <- S_n_inv_prev - a_n * 1/(1 + a_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
@@ -77,7 +80,7 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-
+# print(df)
 init=betas+rnorm(p+1,0,1)
 
 # print(init)

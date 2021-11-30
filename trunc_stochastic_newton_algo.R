@@ -15,7 +15,7 @@ trunc_stochastic_newton_algo <- function(df , CONSTANT, BETA, thetas_prev = rep(
   else{
     m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
   }
-  temp_df <- data.frame(m)
+  temp_df <- data.frame(m, check.names = FALSE)
   
   names <- c()
   # make a vector of names for columns
@@ -47,7 +47,7 @@ trunc_stochastic_newton_algo <- function(df , CONSTANT, BETA, thetas_prev = rep(
     a_n <- drop(PI*(1-PI)) #Use drop to convert from 1x1 matrix to scalar
     
     # alph_n = max(a_n, constant/n^B) = max(1/4(cosh(PHI*thetas_prev/2))^2, constant/n^B)
-    alpha_n <- max(a_n, CONSTANT/(i)**BETA)
+    alpha_n <- max(c(a_n, CONSTANT/(i)**BETA))
     
     S_n_inv <- S_n_inv_prev - alpha_n * 1/(1 + alpha_n*drop((t(PHI) %*% S_n_inv_prev %*% matrix(PHI)))) * 
       S_n_inv_prev %*% matrix(PHI) %*% t(PHI) %*% S_n_inv_prev
@@ -79,7 +79,8 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-head(df)
+print(head(df))
 init=betas+rnorm(p+1,0,1)
 
-print(head(trunc_stochastic_newton_algo(df,init, betas, 1/4, 1/2)))
+print(tail(trunc_stochastic_newton_algo(df,init, 1/4, 1/2)))
+print(betas)
