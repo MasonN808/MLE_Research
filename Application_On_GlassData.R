@@ -32,4 +32,3 @@ print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
 
 # model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
 print(model1$coefficients)
-
