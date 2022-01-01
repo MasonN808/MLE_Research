@@ -79,8 +79,10 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-print(head(df))
+#print(head(df))
 init=betas+rnorm(p+1,0,1)
 
-print(tail(trunc_stochastic_newton_algo(df,init, 1/4, 1/2)))
+print(head(df))
+
+print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
 print(betas)
