@@ -37,19 +37,19 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
     y_preds <- c()   #initialize empty vector of predicted targets
     
     for (i in 1:batch_num){   #iterate through each row of data in the batch
-      Dw <- (-2/batch_num * values[i,]) * (targets[i] - drop(values[i,] %*% drop(w)) - b)   #recalculate gradients using data, use t() for transpose
+      Dw <- Dw + (-2/batch_num * values[i,]) * (targets[i] - drop(values[i,] %*% drop(w)) - b)   #recalculate gradients using data, use t() for transpose
       # print(size(values[i,]))
       # print(size(t(w)))
       # print(size(targets[i]))
       # print(is.matrix(values[i,]))
       # print(is.matrix(t(w)))
       # print(is.matrix(targets[i]))
-      Db <- (-2/batch_num ) * (targets[i] - drop(values[i,] %*% drop(w)) - b)  #recalculate gradients using data, use t() for transpose
+      Db <- Db + (-2/batch_num ) * (targets[i] - drop(values[i,] %*% drop(w)) - b)  #recalculate gradients using data, use t() for transpose
       
       w <- w - eta * Dw   #recalculate weights using updated gradient
       b <- b - eta * Db   #recalculate intercept using updated gradient
       
-      y_pred <- values[i,] %*% w   #calculate predicted target value
+      y_pred <- values[i,] %*% w + b  #calculate predicted target value
       # TODO: y_preds is too long <- caused by w
       y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
     }
