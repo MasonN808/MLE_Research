@@ -45,7 +45,10 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 20){
       b <- b - eta * Db   #recalculate intercept using updated gradient
       
       y_pred <- values[i,] %*% w   #calculate predicted target value
-      y_preds <- append(y_preds, y_pred)  #append predicted value to predicted values vector
+      print(values[i,])
+      print(w)
+      # TODO: y_preds is too long
+      y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
     }
     # print(y_preds)
     loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
