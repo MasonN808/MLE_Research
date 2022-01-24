@@ -5,6 +5,8 @@
 #' @return Real number
 mean_squared_error <- function(prediction, actual){
   if (length(prediction) != length(actual)){
+    print(cat("length of predictionVector: ",length(prediction)))
+    print(cat("length of actualVector: ",length(actual)))
     return("Error: Length of prediction vector and actual vector are not of same size")
   }
   n = length(prediction)
