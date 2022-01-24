@@ -5,10 +5,10 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd <- function(df, eta = .005, num_iter = 50, batch_num = 20){
+sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
-  w = rep(1, ncol(df)-1)  # Randomly initializing weights
+  w = as.vector(rep(1, ncol(df)-1))  # initializing weights
   b = 1   # intercept value set to 1
   epoch = 1
   
@@ -31,28 +31,31 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 20){
     targets <- batch[ , ncol(df)] # vector of target values
     
     Dw = w  #initialize gradient of Loss w.r.t. weights
-    Db = b  #initialize gradient of Loss w.r.t. intercept
+    Db = b  #initialize gradient of Loss w.r.t. bias
     
     loss <- 0
     y_preds <- c()   #initialize empty vector of predicted targets
     
     for (i in 1:batch_num){   #iterate through each row of data in the batch
-      Dw <- (-2/batch_num * values[i,]) * (targets[i] - values[i,] %*% t(targets) - b)   #recalculate gradients using data, use t() for transpose
-      
-      Db <- (-2/batch_num ) * (targets[i] - values[i,] %*% t(targets) - b)  #recalculate gradients using data, use t() for transpose
+      Dw <- (-2/batch_num * values[i,]) * (targets[i] - drop(values[i,] %*% drop(w)) - b)   #recalculate gradients using data, use t() for transpose
+      # print(size(values[i,]))
+      # print(size(t(w)))
+      # print(size(targets[i]))
+      # print(is.matrix(values[i,]))
+      # print(is.matrix(t(w)))
+      # print(is.matrix(targets[i]))
+      Db <- (-2/batch_num ) * (targets[i] - drop(values[i,] %*% drop(w)) - b)  #recalculate gradients using data, use t() for transpose
       
       w <- w - eta * Dw   #recalculate weights using updated gradient
       b <- b - eta * Db   #recalculate intercept using updated gradient
       
       y_pred <- values[i,] %*% w   #calculate predicted target value
-      print(values[i,])
-      print(w)
-      # TODO: y_preds is too long
+      # TODO: y_preds is too long <- caused by w
       y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
     }
     # print(y_preds)
     loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
-    # print(loss)
+    print(loss)
     
     # print(cat(epoch, loss))
     epoch <- epoch + 1  # Go to next epoch
