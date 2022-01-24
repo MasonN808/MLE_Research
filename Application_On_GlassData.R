@@ -25,11 +25,13 @@ df <- data.matrix(df)
 print(df)
 
 
-# Apply the stochastic newton algo
-print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
+# # Apply the stochastic newton algo
+# print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
+# 
+# # Apply the truncated stochastic netwon algo
+# print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
+# 
+# # model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
+# print(model1$coefficients)
 
-# Apply the truncated stochastic netwon algo
-print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
-
-# model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
-print(model1$coefficients)
+print(sgd(df))
