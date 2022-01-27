@@ -36,29 +36,32 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
     loss <- 0
     y_preds <- c()   #initialize empty vector of predicted targets
     
-    for (i in 1:batch_num){   #iterate through each row of data in the batch
-      
-      PHI <- values[i,] #take the ith row in df for every instance in the sequence
-      # print(PHI)
-      exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
-      PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-      
-      Dh <- ((exponent*PHI)/(1+exponent)) - targets  #recalculate gradients using data, use t() for transpose
-      # print(size(values[i,]))
-      # print(size(t(w)))
-      # print(size(targets[i]))
-      # print(is.matrix(values[i,]))
-      # print(is.matrix(t(w)))
-      # print(is.matrix(targets[i]))
-      Db <- (-2/batch_num ) * (targets[i] - drop(values[i,] %*% drop(w)) - b)  #recalculate gradients using data, use t() for transpose
-      
-      w <- w - eta * Dw   #recalculate weights using updated gradient
-      b <- b - eta * Db   #recalculate intercept using updated gradient
-      
-      y_pred <- values[i,] %*% w   #calculate predicted target value
-      # TODO: y_preds is too long <- caused by w
-      y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
-    }
+    
+    
+    PHI <- values[i,] #take the ith row in df for every instance in the sequence
+    # print(PHI)
+    exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
+    PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+    
+    Dh <- ((exponent*PHI)/(1+exponent)) - targets  #recalculate gradients using data, use t() for transpose
+    # print(size(values[i,]))
+    # print(size(t(w)))
+    # print(size(targets[i]))
+    # print(is.matrix(values[i,]))
+    # print(is.matrix(t(w)))
+    # print(is.matrix(targets[i]))
+    Db <- (-2/batch_num ) * (targets[i] - drop(values[i,] %*% drop(w)) - b)  #recalculate gradients using data, use t() for transpose
+    
+    w <- w - eta * Dw   #recalculate weights using updated gradient
+    b <- b - eta * Db   #recalculate intercept using updated gradient
+    
+    y_pred <- values[i,] %*% w   #calculate predicted target value
+    # TODO: y_preds is too long <- caused by w
+    y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
+    
+    
+    
+    
     # print(y_preds)
     loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
     print(loss)
