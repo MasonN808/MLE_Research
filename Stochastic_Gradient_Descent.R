@@ -55,7 +55,7 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
     }
     # print(y_preds)
     loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
-    print(loss)
+    print(loss/batch_num)
     
     # print(cat(epoch, loss))
     epoch <- epoch + 1  # Go to next epoch

@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = ncol(df)-1){
+sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = 10){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
@@ -32,38 +32,40 @@ sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = ncol(df)-1){
     Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
     # print(thetas_prev)
     
-    PHI <- X #take the ith row in df for every instance in the sequence
-    print(PHI)
-    print(thetas_prev)
-    exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
-    print(exponent)
-    print(size(exponent))
-    PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-    # print(size(PI))
-    # print(size(PHI))
-
-    Dh <- Dh + (PI %*% PHI) - Y %*% PHI  #recalculate gradients using data, use t() for transpose
-    # print(size(Dh))
-    # print(size(targets[i]))
-    # print(is.matrix(values[i,]))
-    # print(is.matrix(t(w)))
-    # print(is.matrix(targets[i]))
+    for (i in 1:batch_num){   #iterate through each row of data in the batch
+      print(thetas_prev)
     
-    thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
-    # print(thetas_prev)
-    # 
-    # y_pred <- values[i,] %*% w   #calculate predicted target value
-    # # TODO: y_preds is too long <- caused by w
-    # y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
-    # 
-    # 
-    # 
-    # 
-    # # print(y_preds)
-    # loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
-    # print(loss)
-    
-    # print(cat(epoch, loss))
+      PHI <- X[i,] #take the ith row in df for every instance in the sequence
+  
+      exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
+  
+      PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+      # print(size(PI))
+      # print(size(PHI))
+  
+      Dh <- (PI %*% PHI) - Y[i] * PHI  #recalculate gradients using data, use t() for transpose
+      # print(size(Dh))
+      # print(size(targets[i]))
+      # print(is.matrix(values[i,]))
+      # print(is.matrix(t(w)))
+      # print(is.matrix(targets[i]))
+      
+      thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
+      # print(thetas_prev)
+      # 
+      # y_pred <- values[i,] %*% w   #calculate predicted target value
+      # # TODO: y_preds is too long <- caused by w
+      # y_preds <- c(y_preds, y_pred)  #append predicted value to predicted values vector
+      # 
+      # 
+      # 
+      # 
+      # # print(y_preds)
+      # loss <- mean_squared_error(y_preds, targets)  #calculate MSE as loss
+      # print(loss)
+      
+      # print(cat(epoch, loss))
+    }
     epoch <- epoch + 1  # Go to next epoch
   } 
   return(thetas_prev)
