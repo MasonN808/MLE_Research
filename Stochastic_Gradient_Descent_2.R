@@ -8,7 +8,7 @@
 sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
-  w = as.vector(rep(1, ncol(df)-1))  # initializing weights
+  thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
   b = 1   # intercept value set to 1
   epoch = 1
   
@@ -37,7 +37,13 @@ sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
     y_preds <- c()   #initialize empty vector of predicted targets
     
     for (i in 1:batch_num){   #iterate through each row of data in the batch
-      Dw <- (-2/batch_num * values[i,]) * (targets[i] - drop(values[i,] %*% drop(w)) - b)   #recalculate gradients using data, use t() for transpose
+      
+      PHI <- values[i,] #take the ith row in df for every instance in the sequence
+      # print(PHI)
+      exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
+      PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+      
+      Dh <- ((exponent*PHI)/(1+exponent)) - targets  #recalculate gradients using data, use t() for transpose
       # print(size(values[i,]))
       # print(size(t(w)))
       # print(size(targets[i]))
