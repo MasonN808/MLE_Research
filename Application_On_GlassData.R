@@ -34,4 +34,5 @@ print(df)
 # # model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
 # print(model1$coefficients)
 
-print(sgd(df))
+print(sgd2(df))
+
