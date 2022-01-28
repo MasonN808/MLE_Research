@@ -42,13 +42,13 @@ sgd2 <- function(df, eta = .001, num_iter = 20, batch_num = 10){
       # print(size(PI))
       # print(size(PHI))
   
-      Dh <- Dh + (PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
+      Dh <- Dh + (PI %*% PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
       # NOTE:
       # Y[i] * PHI computes
       # PI %*% PHI does not compute ==> PI is the culprit (maybe not) ==> converges to 1
       # Deleted PHI and computes, but not sure if computes correctly
       
-      print(PI)
+      print(exponent)
       
       # print(size(Dh))
       # print(size(targets[i]))
@@ -56,12 +56,32 @@ sgd2 <- function(df, eta = .001, num_iter = 20, batch_num = 10){
       # print(is.matrix(t(w)))
       # print(is.matrix(targets[i]))
       thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
-      print(thetas_prev)
+      # print(thetas_prev)
       # print(i)
 
     }
     epoch <- epoch + 1  # Go to next epoch
-    eta = eta/1.02
+    eta = eta / 1.02
   } 
   return(thetas_prev)
 }
+
+
+# Testing
+p <- 5
+n <- 10000
+x <- matrix(rnorm(n * p), n, p)
+x=cbind(1,x)
+betas <- runif(p+1, -2, 2)
+hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
+p.true <- hc(x %*% betas)
+y <- rbinom(n, 1, p.true)
+df <- cbind(x,y)
+# print(df)
+init=betas+rnorm(p+1,0,1)
+
+# print(init)
+library(pracma)
+print(sgd2(df))
+#exact values
+print(betas)
