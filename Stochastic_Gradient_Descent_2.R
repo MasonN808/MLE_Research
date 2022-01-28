@@ -11,15 +11,15 @@ sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = 10){
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
   epoch = 1
   
-  m <- matrix(NA, ncol = ncol(df), nrow = 1)
-  temp_df <- data.frame(m, check.names = FALSE)
-  names <- c()
-  # make a vector of names for columns
-  for (i in 1:ncol(df)-1) {
-    names <- append(names, paste0("Theta.", i))
-  }
-  colnames(temp_df) <- names
-  temp_df <- na.omit(temp_df)
+  # m <- matrix(NA, ncol = ncol(df), nrow = 1)
+  # temp_df <- data.frame(m, check.names = FALSE)
+  # names <- c()
+  # # make a vector of names for columns
+  # for (i in 1:ncol(df)-1) {
+  #   names <- append(names, paste0("Theta.", i))
+  # }
+  # colnames(temp_df) <- names
+  # temp_df <- na.omit(temp_df)
   
   while (epoch <= num_iter){
     # NOTE: batch works
@@ -33,7 +33,6 @@ sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = 10){
     # print(thetas_prev)
     
     for (i in 1:batch_num){   #iterate through each row of data in the batch
-      print(thetas_prev)
     
       PHI <- X[i,] #take the ith row in df for every instance in the sequence
   
@@ -43,7 +42,7 @@ sgd2 <- function(df, eta = .005, num_iter = 50, batch_num = 10){
       # print(size(PI))
       # print(size(PHI))
   
-      Dh <- (PI %*% PHI) - Y[i] * PHI  #recalculate gradients using data, use t() for transpose
+      Dh <- Dh + (PI %*% PHI) - Y[i] * PHI  #recalculate gradients using data, use t() for transpose
       # print(size(Dh))
       # print(size(targets[i]))
       # print(is.matrix(values[i,]))
