@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, eta = .01, num_iter = 20, batch_num = 10){
+sgd2 <- function(df, eta = .001, num_iter = 20, batch_num = 10){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
@@ -42,7 +42,14 @@ sgd2 <- function(df, eta = .01, num_iter = 20, batch_num = 10){
       # print(size(PI))
       # print(size(PHI))
   
-      Dh <- Dh + (PI %*% PHI) - Y[i] * PHI  #recalculate gradients using data, use t() for transpose
+      Dh <- Dh + (PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
+      # NOTE:
+      # Y[i] * PHI computes
+      # PI %*% PHI does not compute ==> PI is the culprit (maybe not) ==> converges to 1
+      # Deleted PHI and computes, but not sure if computes correctly
+      
+      print(PI)
+      
       # print(size(Dh))
       # print(size(targets[i]))
       # print(is.matrix(values[i,]))
@@ -54,6 +61,7 @@ sgd2 <- function(df, eta = .01, num_iter = 20, batch_num = 10){
 
     }
     epoch <- epoch + 1  # Go to next epoch
+    eta = eta/1.02
   } 
   return(thetas_prev)
 }

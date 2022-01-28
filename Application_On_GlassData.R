@@ -24,9 +24,9 @@ df <- cbind(free = 1, df)
 df <- data.matrix(df)
 
 # df_norm <- as.data.frame(lapply(df[:], min_max_norm))
-df_norm <- scale(df[2:ncol(df)-1])
+# df_norm <- scale(df)
 
-print(df_norm)
+print(df)
 
 
 # # Apply the stochastic newton algo
@@ -39,4 +39,6 @@ print(df_norm)
 # print(model1$coefficients)
 
 print(sgd2(df))
+
+print(tail(df))
 
