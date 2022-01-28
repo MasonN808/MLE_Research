@@ -1,4 +1,4 @@
-#' Implementation of the stochastic gradient descent
+#' Implementation of the stochastic gradient descent with loss function presented in "An stochastic ..."
 #' 
 #' @param df A data frame.
 #' @param eta Learning rate
