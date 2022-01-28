@@ -24,7 +24,7 @@ df <- cbind(free = 1, df)
 df <- data.matrix(df)
 
 # df_norm <- as.data.frame(lapply(df[:], min_max_norm))
-# df_norm <- scale(df)
+df_norm <- scale(df)
 
 print(df)
 
