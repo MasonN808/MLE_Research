@@ -27,12 +27,14 @@ df <- data.matrix(df)
 print(head(df))
 
 # Apply the stochastic newton algo
-print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
+# print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
 
 # Apply the truncated stochastic netwon algo
-print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
+# print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
 
 model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)
-# print(model2$coefficients)
+print(model2$coefficients)
+
+print(sgd2(df))
 
 

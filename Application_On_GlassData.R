@@ -22,7 +22,11 @@ init = model1$coefficients + .05*rnorm(ncol(df), 0, 1)
 df <- cbind(free = 1, df)
 # Turn df into a matrix to make compatible with algorithm
 df <- data.matrix(df)
-print(df)
+
+# df_norm <- as.data.frame(lapply(df[:], min_max_norm))
+df_norm <- scale(df[2:ncol(df)-1])
+
+print(df_norm)
 
 
 # # Apply the stochastic newton algo
