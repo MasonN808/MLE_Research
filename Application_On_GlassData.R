@@ -20,13 +20,17 @@ model1 <- glm(Type ~ RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = df, famil
 init = model1$coefficients + .05*rnorm(ncol(df), 0, 1)
 
 df <- cbind(free = 1, df)
+
+# y <- rbinom(nrow(df), 1, p.true) 
+
+# df[ncol(df)] <- y
 # Turn df into a matrix to make compatible with algorithm
 df <- data.matrix(df)
 
 # df_norm <- as.data.frame(lapply(df[:], min_max_norm))
-df_norm <- scale(df)
-
-print(df)
+# df_norm <- scale(df)
+print(unique(df[c("Type")]))
+# print(df)
 
 
 # # Apply the stochastic newton algo
@@ -35,8 +39,8 @@ print(df)
 # # Apply the truncated stochastic netwon algo
 # print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
 # 
-# # model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
-# print(model1$coefficients)
+# model1 <- glm(Type ~  RI + Na + Mg + Al + Si + K + Ca + Ba + Fe, data = Glass, family = binomial)
+print(model1$coefficients)
 
 print(sgd2(df))
 

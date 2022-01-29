@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 100){
+sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
@@ -35,7 +35,8 @@ sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 100){
     for (i in 1:batch_num){   #iterate through each row of data in the batch
     
       PHI <- X[i,] #take the ith row in df for every instance in the sequence
-  
+      # print(typeof(thetas_prev))
+      # print(typeof(PHI))
       exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
   
       PI <- exp(exponent)/(1+exp(exponent)) #logistic function
@@ -77,7 +78,7 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-# print(df)
+print(df)
 init=betas+rnorm(p+1,0,1)
 
 # print(init)
