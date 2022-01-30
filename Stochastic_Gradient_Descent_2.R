@@ -43,7 +43,6 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
   
   # assign the names vector to the column names of temp data frame
   colnames(temp_df) <- names
-  print(temp_df)
   
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
@@ -54,7 +53,7 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
   else{
     temp_df[1,] <- thetas_prev
   }
-  print(temp_df)
+
   while (epoch <= num_iter){
     # NOTE: batch works
     batch <- df[sample(nrow(df), size=batch_num,replace=FALSE),]  # take a random batch from the data
@@ -106,7 +105,8 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
-      temp_df <- rbind(temp_df, thetas_prev)
+      # need to drop extra dimension (don't ask)
+      temp_df <- rbind(temp_df, drop(thetas_prev))
     }
   } #end while
   return(temp_df)
