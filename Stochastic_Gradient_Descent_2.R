@@ -5,9 +5,9 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
+sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
   # TODO: check if batch_num is less than number of rows in df
-  thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
+  thetas_prev = init  # initializing weights
   epoch = 1
   
   # m <- matrix(NA, ncol = ncol(df), nrow = 1)
