@@ -25,11 +25,14 @@ df <- cbind(free = 1, df)
 
 # df[ncol(df)] <- y
 # Turn df into a matrix to make compatible with algorithm
+
+print(unique(df[c("Type")]))
+
 df <- data.matrix(df)
 
 # df_norm <- as.data.frame(lapply(df[:], min_max_norm))
 # df_norm <- scale(df)
-print(unique(df[c("Type")]))
+
 # print(df)
 
 

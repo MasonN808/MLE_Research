@@ -16,15 +16,35 @@ df <- subset(df, select = -c(Id))
 # Remove NA values by removing row
 df <- na.omit(df)
 
+# Add free column of 1s
 df <- cbind(free = 1, df)
 
 # Declare initial values
-# Default initial values
 init = rep(.1, ncol(df)-1)
+
+# print((df[c("Class")]))
+
+print(unique(df[c("Class")]))
+
+df$Class <- as.numeric((df$Class))
+
+df[] <- lapply(df, function(x) {
+  if(is.factor(x)){
+    as.numeric(as.character(x))
+  }
+  else{
+    x
+  }
+})
+sapply(df, class)
+
+df[3:ncol(df)-1] <- min_max_norm(df[3:ncol(df)-1])
+
+
 
 # Turn df into a matrix to make compatible with algorithm
 df <- data.matrix(df)
-print(head(df))
+print((df))
 
 # Apply the stochastic newton algo
 # print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
