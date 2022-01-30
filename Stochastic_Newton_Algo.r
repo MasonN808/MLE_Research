@@ -59,8 +59,8 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     S_n_inv_prev <- S_n_inv
     
     if (!is.null(exact)){
-      ## Add error
-      error = Norm(thetas_prev - exact, p = 2)
+      # Add error
+      error = norm(thetas_prev - exact)
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
