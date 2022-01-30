@@ -57,7 +57,7 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     
     thetas_prev <- drop(thetas) #Use drop to drop extra dimension from thetas
     S_n_inv_prev <- S_n_inv
-    
+
     if (!is.null(exact)){
       # Add error
       error = norm(thetas_prev - exact)
@@ -67,6 +67,10 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
       temp_df <- rbind(temp_df, thetas_prev)
     }
   }
+  print(typeof(temp_df))
+  print(typeof(thetas_prev))
+  print(colnames(temp_df))
+  print(colnames(thetas_prev))
   return(temp_df)
 }
 
