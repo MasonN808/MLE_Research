@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30){
+sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
@@ -20,6 +20,38 @@ sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30){
   # }
   # colnames(temp_df) <- names
   # temp_df <- na.omit(temp_df)
+  
+  # initialize a data frame to store thetas after every iteration
+  if (!is.null(exact)){
+    ## Add error column
+    m <- matrix(NA, ncol = ncol(df), nrow = 1)
+  }
+  else{
+    m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
+  }
+  
+  temp_df <- data.frame(m, check.names = FALSE)
+  
+  names <- c()
+  # make a vector of names for columns
+  for (i in 2:ncol(df)-2) {
+    names <- append(names, paste0("Theta.", i))
+  }
+  if (!is.null(exact)){
+    # Add error column
+    names <- append(names, "error")
+  }
+  # assign the names vector to the column names of temp data frame
+  colnames(temp_df) <- names
+  # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
+  if (!is.null(exact)){
+    # Add error
+    error = norm(thetas_prev - exact)
+    temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
+  }
+  else{
+    temp_df <- na.omit(rbind(temp_df, thetas_prev))
+  }
   
   while (epoch <= num_iter){
     # NOTE: batch works
@@ -63,8 +95,17 @@ sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30){
     }
     epoch <- epoch + 1  # Go to next epoch
     eta = eta / 1.02
+    
+    if (!is.null(exact)){
+      # Add error
+      error = norm(thetas_prev - exact)
+      temp_df <- rbind(temp_df, c(thetas_prev, error))
+    }
+    else{
+      temp_df <- rbind(temp_df, thetas_prev)
+    }
   } 
-  return(thetas_prev)
+  return(temp_df)
 }
 
 
