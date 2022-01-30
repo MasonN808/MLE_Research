@@ -28,6 +28,8 @@ print(unique(df[c("Class")]))
 
 df$Class <- as.numeric((df$Class))
 
+
+# Change all values/columns to numeric
 df[] <- lapply(df, function(x) {
   if(is.factor(x)){
     as.numeric(as.character(x))
@@ -36,8 +38,11 @@ df[] <- lapply(df, function(x) {
     x
   }
 })
+
 sapply(df, class)
 
+
+# Apply min_max normalization to predictor variables, excluding free column
 df[3:ncol(df)-1] <- min_max_norm(df[3:ncol(df)-1])
 
 
@@ -46,15 +51,17 @@ df[3:ncol(df)-1] <- min_max_norm(df[3:ncol(df)-1])
 df <- data.matrix(df)
 print((df))
 
-# Apply the stochastic newton algo
-# print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
+# Stochastic Newton
+print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
 
-# Apply the truncated stochastic netwon algo
-# print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
+# Truncated Stochastic Netwon
+print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
 
-model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)
-print(model2$coefficients)
+# Model from R
+# model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)
+# print(model2$coefficients)
 
+# Stochastic Gradient Descent
 print(sgd2(df))
 
 
