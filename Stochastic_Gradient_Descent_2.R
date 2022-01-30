@@ -5,9 +5,8 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
+sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
   # TODO: check if batch_num is less than number of rows in df
-  # TODO: make error vector
   thetas_prev = as.vector(rep(1, ncol(df)-1))  # initializing weights
   epoch = 1
   
@@ -41,8 +40,10 @@ sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
     # Add error column
     names <- append(names, "error")
   }
+  
   # assign the names vector to the column names of temp data frame
   colnames(temp_df) <- names
+  
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
     # Add error
@@ -96,15 +97,21 @@ sgd2 <- function(df, eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
     epoch <- epoch + 1  # Go to next epoch
     eta = eta / 1.02
     
+    print(typeof(temp_df))
+    print(typeof(thetas_prev))
+    print(colnames(temp_df))
+    print(colnames(thetas_prev))
+    # Append weights/weights (and errors) to df
     if (!is.null(exact)){
       # Add error
       error = norm(thetas_prev - exact)
+      print(error)
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
       temp_df <- rbind(temp_df, thetas_prev)
     }
-  } 
+  } #end while
   return(temp_df)
 }
 
@@ -119,7 +126,7 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-print(df)
+# print(df)
 init=betas+rnorm(p+1,0,1)
 
 # Normalize the data
@@ -127,6 +134,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(sgd2(df))
+print(tail(sgd2(df)))
 #exact values
 print(betas)
