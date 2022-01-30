@@ -38,7 +38,6 @@ df[] <- lapply(df, function(x) {
     x
   }
 })
-
 sapply(df, class)
 
 

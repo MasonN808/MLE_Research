@@ -19,7 +19,8 @@ init=betas+rnorm(p+1,0,1)
 # print(tail(stochastic_newton_algo(df,init)))
 output.df <- stochastic_newton_algo(df,init, exact = betas)
 output.df1 <- trunc_stochastic_newton_algo(df,init, exact = betas, 1/4, 1/2) # What do these constants do?
-output.df2 <- sgd2(df)
+# set nrow to align with newton algos that are limited by number of rows
+output.df2 <- sgd2(df, init, num_iter = nrow(df))
 ## DELETE LAST LINE OF output.df SINCE ALL 0s (ISSUE)
 output.df <- head(output.df, -1)
 output.df1 <- head(output.df1, -1)
@@ -48,7 +49,7 @@ p <- ggplot() +
                outlier.size=1) + 
   geom_boxplot(aes(x = "TSNA", y=error1), outlier.colour="red", outlier.shape=8,
                outlier.size=1) +
-  geom_boxplot(aes(x = "SGD", y=error1), outlier.colour="red", outlier.shape=8,
+  geom_boxplot(aes(x = "SGD", y=error2), outlier.colour="red", outlier.shape=8,
              outlier.size=1)
 print(p)
 
