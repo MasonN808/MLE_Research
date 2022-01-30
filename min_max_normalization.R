@@ -1,5 +1,3 @@
-
-
 #' Implementation of min-max normalization
 #' 
 #' @param x A vector
