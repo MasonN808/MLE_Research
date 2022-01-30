@@ -31,7 +31,7 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
     ## Add error
-    error = Norm(thetas_prev - exact, p = 2)
+    error = norm_L2(thetas_prev - exact)
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
@@ -60,17 +60,13 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
 
     if (!is.null(exact)){
       # Add error
-      error = norm(thetas_prev - exact)
+      error = norm_L2(thetas_prev - exact)
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
       temp_df <- rbind(temp_df, thetas_prev)
     }
   }
-  print(typeof(temp_df))
-  print(typeof(thetas_prev))
-  print(colnames(temp_df))
-  print(colnames(thetas_prev))
   return(temp_df)
 }
 
