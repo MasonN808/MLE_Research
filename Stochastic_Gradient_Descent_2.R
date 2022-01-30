@@ -43,6 +43,7 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
   
   # assign the names vector to the column names of temp data frame
   colnames(temp_df) <- names
+  print(temp_df)
   
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
@@ -51,9 +52,9 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
-    temp_df <- na.omit(rbind(temp_df, thetas_prev))
+    temp_df[1,] <- thetas_prev
   }
-  
+  print(temp_df)
   while (epoch <= num_iter){
     # NOTE: batch works
     batch <- df[sample(nrow(df), size=batch_num,replace=FALSE),]  # take a random batch from the data
@@ -97,10 +98,6 @@ sgd2 <- function(df, init, eta = .001, num_iter = 1000, batch_num = 30, exact = 
     epoch <- epoch + 1  # Go to next epoch
     eta = eta / 1.02
     
-    print(typeof(temp_df))
-    print(typeof(thetas_prev))
-    print(colnames(temp_df))
-    print(colnames(thetas_prev))
     # Append weights/weights (and errors) to df
     if (!is.null(exact)){
       # Add error

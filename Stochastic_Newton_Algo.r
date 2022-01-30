@@ -35,7 +35,7 @@ stochastic_newton_algo <- function(df, thetas_prev = rep(1, ncol(df)-1), exact =
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
-    temp_df <- na.omit(rbind(temp_df, thetas_prev))
+    temp_df[1,] <- thetas_prev
   }
   
   iterations = nrow(df)
