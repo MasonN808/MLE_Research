@@ -47,7 +47,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
   # insert first initial thetas from input and remove NAs when initiated temp_df(could be done differently to name columns?)
   if (!is.null(exact)){
     # Add error
-    error = norm(thetas_prev - exact)
+    error = norm_L2(thetas_prev - exact)
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
@@ -100,8 +100,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     # Append weights/weights (and errors) to df
     if (!is.null(exact)){
       # Add error
-      error = norm(thetas_prev - exact)
-      print(error)
+      error = norm_L2(thetas_prev - exact)
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{

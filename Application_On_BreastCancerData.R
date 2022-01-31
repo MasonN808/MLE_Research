@@ -61,6 +61,6 @@ print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
 # print(model2$coefficients)
 
 # Stochastic Gradient Descent
-print(sgd2(df))
+print(tail(sgd2(df)))
 
 
