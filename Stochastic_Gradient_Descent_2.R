@@ -10,16 +10,6 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
   thetas_prev = init  # initializing weights
   epoch = 1
   
-  # m <- matrix(NA, ncol = ncol(df), nrow = 1)
-  # temp_df <- data.frame(m, check.names = FALSE)
-  # names <- c()
-  # # make a vector of names for columns
-  # for (i in 1:ncol(df)-1) {
-  #   names <- append(names, paste0("Theta.", i))
-  # }
-  # colnames(temp_df) <- names
-  # temp_df <- na.omit(temp_df)
-  
   # initialize a data frame to store thetas after every iteration
   if (!is.null(exact)){
     ## Add error column
@@ -51,6 +41,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     temp_df <- na.omit(rbind(temp_df, c(thetas_prev, error)))
   }
   else{
+    # Change first row of NaNs to initial thetas value
     temp_df[1,] <- thetas_prev
   }
 
@@ -130,6 +121,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df)))
+print(tail(sgd2(df, eta = .01, num_iter = 20000, batch_num = 2)))
 #exact values
 print(betas)
