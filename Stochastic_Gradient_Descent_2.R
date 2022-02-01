@@ -47,30 +47,27 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
   while (epoch <= num_iter){
     # NOTE: batch works
-    batch <- df[sample(nrow(df), size=batch_num,replace=FALSE),]  # take a random batch from the data
+    batch <- df[sample(nrow(df), batch_num,replace=FALSE),]  # take a random batch from the data
     # NOTE: values works
-    X <- batch[ , 1:(ncol(df)-1)] # matrix of data values, ommitting targets
+    X <- batch[1:(ncol(df)-1)] # matrix of data values, ommitting targets
     # NOTE: targets works
-    Y <- batch[ , ncol(df)] # vector of target values
+    Y <- batch[ncol(df)] # vector of target values
     
     Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
     # print(thetas_prev)
     
-    for (i in 1:batch_num){   #iterate through each row of data in the batch
-    
-      PHI <- X[i,] #take the ith row in df for every instance in the sequence
-      # print(typeof(thetas_prev))
-      # print(typeof(PHI))
-      exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
-  
-      PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-  
-      Dh <- Dh + (PI %*% PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
+    PHI <- X #take the ith row in df for every instance in the sequence
+    # print(typeof(thetas_prev))
+    # print(typeof(PHI))
+    exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
 
-      thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
-      # print(thetas_prev)
+    PI <- exp(exponent)/(1+exp(exponent)) #logistic function
 
-    }
+    Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data, use t() for transpose
+
+    thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
+    # print(thetas_prev)
+
     epoch <- epoch + 1  # Go to next epoch
     eta = eta / 1.02
     
@@ -99,6 +96,7 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
+print(y)
 # print(df)
 init=betas+rnorm(p+1,0,1)
 
@@ -107,6 +105,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .01, num_iter = 20000, batch_num = 2)))
+print(tail(sgd2(df, eta = .01, num_iter = 20000, batch_num = 1)))
 #exact values
 print(betas)
