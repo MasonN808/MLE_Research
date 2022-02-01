@@ -64,25 +64,11 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
       exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
   
       PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-      # print(size(PI))
-      # print(size(PHI))
   
       Dh <- Dh + (PI %*% PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
-      # NOTE:
-      # Y[i] * PHI computes
-      # PI %*% PHI does not compute ==> PI is the culprit (maybe not) ==> converges to 1
-      # Deleted PHI and computes, but not sure if computes correctly
-      
-      # print(exponent)
-      
-      # print(size(Dh))
-      # print(size(targets[i]))
-      # print(is.matrix(values[i,]))
-      # print(is.matrix(t(w)))
-      # print(is.matrix(targets[i]))
+
       thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
       # print(thetas_prev)
-      # print(i)
 
     }
     epoch <- epoch + 1  # Go to next epoch
