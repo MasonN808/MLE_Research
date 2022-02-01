@@ -63,7 +63,9 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
 
-    Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data, use t() for transpose
+    # Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data, use t() for transpose
+    
+    Dh <- Dh + drop(PHI*(Y - PI))  #recalculate gradients using data, use t() for transpose
 
     thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
     # print(thetas_prev)
@@ -96,7 +98,6 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-print(y)
 # print(df)
 init=betas+rnorm(p+1,0,1)
 
@@ -105,6 +106,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .01, num_iter = 20000, batch_num = 1)))
+print(tail(sgd2(df, eta = .01, num_iter = 2000)))
 #exact values
 print(betas)
