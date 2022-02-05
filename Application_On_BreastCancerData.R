@@ -13,6 +13,8 @@ df <- data.frame(BreastCancer)
 # Drop the Id column since it wont be used in our model
 df <- subset(df, select = -c(Id))
 
+
+
 # Remove NA values by removing row
 df <- na.omit(df)
 
@@ -24,12 +26,19 @@ init = rep(.1, ncol(df)-1)
 
 # print((df[c("Class")]))
 
-print(unique(df[c("Class")]))
 
+# Remove unwanted levels in Class for numeric computation
 df$Class <- as.numeric((df$Class))
 
+print(unique(df[c("Class")]))
 
-# Change all values/columns to numeric
+# Replace all 2s to 0 in target variable
+df["Class"][df["Class"] == "2"] <- "0"
+
+print(unique(df[c("Class")]))
+print((df["Class"]))
+
+# Change all values/columns to numeric from levels
 df[] <- lapply(df, function(x) {
   if(is.factor(x)){
     as.numeric(as.character(x))
@@ -42,12 +51,16 @@ sapply(df, class)
 
 
 # Apply min_max normalization to predictor variables, excluding free column
+# stochastic_newton_algo needs normalization to run
 df[3:ncol(df)-1] <- min_max_norm(df[3:ncol(df)-1])
 
-
+# remove column and replace with transformed target variables from {1,2} --> {0,1}
+temp_df <- df[1:ncol(df)-1]
+temp_df[ncol(df)] <- droplevels(df["Class"])
+print(temp_df)
 
 # Turn df into a matrix to make compatible with algorithm
-df <- data.matrix(df)
+df <- data.matrix(temp_df)
 print((df))
 
 # Stochastic Newton

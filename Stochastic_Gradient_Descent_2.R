@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
+sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter = 1000, batch_num = 1, exact = NULL){
   # TODO: check if batch_num is less than number of rows in df
   thetas_prev = init  # initializing weights
   epoch = 1
@@ -47,12 +47,14 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
   while (epoch <= num_iter){
     # NOTE: batch works
-    batch <- df[sample(nrow(df), batch_num,replace=FALSE),]  # take a random batch from the data
+    batch <- df[sample(nrow(df), 1,replace=FALSE),]  # take a random batch from the data
+    # print(batch)
     # NOTE: values works
     X <- batch[1:(ncol(df)-1)] # matrix of data values, ommitting targets
+    # print(X)
     # NOTE: targets works
     Y <- batch[ncol(df)] # vector of target values
-    
+    # print(Y)
     Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
     # print(thetas_prev)
     
@@ -63,9 +65,10 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
 
-    # Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data, use t() for transpose
+    Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data, use t() for transpose
     
-    Dh <- Dh + drop(PHI*(Y - PI))  #recalculate gradients using data, use t() for transpose
+    # Dh <- Dh + drop(PHI*(Y - PI))  #recalculate gradients using data, use t() for transpose
+    # print(Dh)
 
     thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
     # print(thetas_prev)
@@ -106,6 +109,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .01, num_iter = 2000)))
+print(tail(sgd2(df, eta = .01, num_iter = 20000, exact = betas)))
 #exact values
 print(betas)
