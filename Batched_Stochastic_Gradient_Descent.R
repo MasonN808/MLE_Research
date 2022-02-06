@@ -5,10 +5,11 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter = 1000, batch_num = 1, exact = NULL){
+sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter = 1000, batch_num = 30, exact = NULL){
   # TODO: check if batch_num is less than number of rows in df
   thetas_prev = init  # initializing weights
   epoch = 1
+  
   # initialize a data frame to store thetas after every iteration
   if (!is.null(exact)){
     ## Add error column
@@ -44,33 +45,48 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     temp_df[1,] <- thetas_prev
   }
   
-
   while (epoch <= num_iter){
-    batch <- df[sample(nrow(df), size = 1, replace=FALSE),]  # take a random batch from the data
-
-    X <- batch[1:(ncol(df)-1)] # matrix of data values, ommitting targets
-
-    Y <- batch[ncol(df)] # vector of target values
-
-    # Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
-
-    PHI <- X
-
-    exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
-
-    PI <- exp(exponent)/(1+exp(exponent)) #logistic function
-
-    # Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data
+    # NOTE: batch works
+    batch <- df[sample(nrow(df), size=batch_num,replace=FALSE),]  # take a random batch from the data
+    # NOTE: values works
+    X <- batch[ , 1:(ncol(df)-1)] # matrix of data values, ommitting targets
+    # NOTE: targets works
+    Y <- batch[ , ncol(df)] # vector of target values
     
-    # Dh <- Dh + PHI * drop(Y - PI)  #recalculate gradients using data
-    
-    Dh <- as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
-
-    thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
+    Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
     # print(thetas_prev)
-
+    
+    for (i in 1:batch_num){   #iterate through each row of data in the batch
+      
+      PHI <- X[i,] #take the ith row in df for every instance in the sequence
+      # print(typeof(thetas_prev))
+      # print(typeof(PHI))
+      exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
+      
+      PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+      # print(size(PI))
+      # print(size(PHI))
+      
+      Dh <- Dh + (PI %*% PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
+      # NOTE:
+      # Y[i] * PHI computes
+      # PI %*% PHI does not compute ==> PI is the culprit (maybe not) ==> converges to 1
+      # Deleted PHI and computes, but not sure if computes correctly
+      
+      # print(exponent)
+      
+      # print(size(Dh))
+      # print(size(targets[i]))
+      # print(is.matrix(values[i,]))
+      # print(is.matrix(t(w)))
+      # print(is.matrix(targets[i]))
+      thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
+      # print(thetas_prev)
+      # print(i)
+      
+    }
     epoch <- epoch + 1  # Go to next epoch
-    # eta = eta / 1.02
+    eta = eta / 1.02
     
     # Append weights/weights (and errors) to df
     if (!is.null(exact)){
@@ -105,6 +121,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .1, num_iter = 1000, exact = betas)))
+print(tail(sgd2(df, eta = .01, num_iter = 1000, batch_num = 1)))
 #exact values
 print(betas)
