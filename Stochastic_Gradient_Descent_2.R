@@ -64,7 +64,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     
     # Dh <- Dh + PHI * drop(Y - PI)  #recalculate gradients using data
     
-    Dh <- Dh + as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
+    Dh <- as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
 
     thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
     # print(thetas_prev)
