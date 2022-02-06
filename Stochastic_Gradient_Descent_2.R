@@ -52,7 +52,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
     Y <- batch[ncol(df)] # vector of target values
 
-    Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
+    # Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
 
     PHI <- X
 
