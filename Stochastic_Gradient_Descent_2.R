@@ -46,7 +46,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
   
 
   while (epoch <= num_iter){
-    batch <- df[sample(nrow(df), 1, replace=FALSE),]  # take a random batch from the data
+    batch <- df[sample(nrow(df), size = 1, replace=FALSE),]  # take a random batch from the data
 
     X <- batch[1:(ncol(df)-1)] # matrix of data values, ommitting targets
 
@@ -62,7 +62,9 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
     # Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data
     
-    Dh <- Dh + PHI * drop(Y - PI)  #recalculate gradients using data
+    # Dh <- Dh + PHI * drop(Y - PI)  #recalculate gradients using data
+    
+    Dh <- Dh + as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
 
     thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
     # print(thetas_prev)
@@ -103,6 +105,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .1, num_iter = 2000, exact = betas)))
+print(tail(sgd2(df, eta = .1, num_iter = 1000, exact = betas)))
 #exact values
 print(betas)
