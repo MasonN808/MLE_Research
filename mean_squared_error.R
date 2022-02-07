@@ -14,5 +14,5 @@ mean_squared_error <- function(prediction, actual){
   for (i in 1: n){
     prev <- prev + (prediction[i] - actual[i])^2
   }
-  return(prev)
+  return(prev/n)
 }
