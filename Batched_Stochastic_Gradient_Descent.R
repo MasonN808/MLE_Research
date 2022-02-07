@@ -49,9 +49,9 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     # NOTE: batch works
     batch <- df[sample(nrow(df), size=batch_num,replace=FALSE),]  # take a random batch from the data
     # NOTE: values works
-    X <- batch[ , 1:(ncol(df)-1)] # matrix of data values, ommitting targets
+    X <- batch[1:(ncol(df)-1)] # matrix of data values, ommitting targets
     # NOTE: targets works
-    Y <- batch[ , ncol(df)] # vector of target values
+    Y <- batch[, ncol(df)] # vector of target values
     
     Dh = thetas_prev  #initialize gradient of Loss w.r.t. thetas
     # print(thetas_prev)
@@ -67,19 +67,8 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
       # print(size(PI))
       # print(size(PHI))
       
-      Dh <- Dh + (PI %*% PHI) - (Y[i] * PHI)  #recalculate gradients using data, use t() for transpose
-      # NOTE:
-      # Y[i] * PHI computes
-      # PI %*% PHI does not compute ==> PI is the culprit (maybe not) ==> converges to 1
-      # Deleted PHI and computes, but not sure if computes correctly
+      Dh <- as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
       
-      # print(exponent)
-      
-      # print(size(Dh))
-      # print(size(targets[i]))
-      # print(is.matrix(values[i,]))
-      # print(is.matrix(t(w)))
-      # print(is.matrix(targets[i]))
       thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
       # print(thetas_prev)
       # print(i)

@@ -70,10 +70,13 @@ print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could 
 print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
 
 # Model from R
-# model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)
-# print(model2$coefficients)
+
 
 # Stochastic Gradient Descent
 print(tail(sgd2(df)))
+
+model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)
+print(model2$coefficients)
+
 
 
