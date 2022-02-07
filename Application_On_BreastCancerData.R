@@ -67,7 +67,7 @@ init = rep(1, ncol(df)-1)
 print(tail(stochastic_newton_algo(df,init))) # Output gives lots on NaNs (could be dividing by 0?)
 
 # Truncated Stochastic Netwon
-print(tail(trunc_stochastic_newton_algo(df, 1/4, 1/2, init)))
+print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
 
 # Model from R
 # model2 <- glm(Class ~ Cl.thickness + Cell.size + Cell.shape + Marg.adhesion + Epith.c.size + Bare.nuclei +Bl.cromatin + Normal.nucleoli + Mitoses, data = BreastCancer, family = binomial)

@@ -18,7 +18,7 @@ init=betas+rnorm(p+1,0,1)
 # print(tail(trunc_stochastic_newton_algo(df,init, 1/4, 1/2)))
 # print(tail(stochastic_newton_algo(df,init)))
 output.df <- stochastic_newton_algo(df,init, exact = betas)
-output.df1 <- trunc_stochastic_newton_algo(df,init, exact = betas, .24, .49)
+output.df1 <- trunc_stochastic_newton_algo(df,init, exact = betas, CONSTANT = 10^(-10), BETA = .49)
 # set nrow to align with newton algos that are limited by number of rows
 output.df2 <- sgd2(df, init, eta = .01, num_iter = n, exact = betas)
 ## DELETE LAST LINE OF output.df SINCE ALL 0s (ISSUE)
