@@ -6,7 +6,7 @@
 #' @param CONSTANT A positive real number.
 #' @param BETA A number in [0, 1/2].
 #' @return A data frame of thetas after nrow(df) iterations.
-trunc_stochastic_newton_algo <- function(df , CONSTANT, BETA, thetas_prev = rep(1, ncol(df)-1), exact = NULL){
+trunc_stochastic_newton_algo <- function(df , CONSTANT = 10^(-10), BETA = .49, thetas_prev = rep(1, ncol(df)-1), exact = NULL){
   # initialize a data frame to store thetas after every iteration
   if (!is.null(exact)){
     ## Add error column
