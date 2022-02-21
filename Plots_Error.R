@@ -21,16 +21,20 @@ output.df <- stochastic_newton_algo(df,init, exact = betas)
 output.df1 <- trunc_stochastic_newton_algo(df,init, exact = betas, CONSTANT = 10^(-10), BETA = .49)
 # set nrow to align with newton algos that are limited by number of rows
 output.df2 <- sgd2(df, init, eta = .01, num_iter = n, exact = betas)
+output.df3 <- sgd_batched(df, init, eta = .01, num_iter = n, batch_num = 10, exact = betas)
 ## DELETE LAST LINE OF output.df SINCE ALL 0s (ISSUE)
 output.df <- head(output.df, -1)
 output.df1 <- head(output.df1, -1)
 output.df2 <- head(output.df2, -1)
+output.df3 <- head(output.df3, -1)
 
 error <- output.df[, ncol(output.df)]
 
 error1 <- output.df1[, ncol(output.df1)]
 
 error2 <- output.df2[, ncol(output.df2)]
+
+error3 <- output.df3[, ncol(output.df3)]
 
 # Make the plots
 n <- seq(1, n, by = 1)
@@ -41,6 +45,8 @@ p <- ggplot()+
   geom_point(aes(n, y = error1), color = "orange", shape = 15, size = .25) + 
   geom_line(aes(n, y = error2), color = "salmon") + 
   geom_point(aes(n, y = error2), color = "salmon", shape = 15, size = .25) + 
+  geom_line(aes(n, y = error3), color = "blue") + 
+  geom_point(aes(n, y = error3), color = "blue", shape = 15, size = .25) + 
   ggtitle("Error plot")
 print(p)
 
@@ -50,6 +56,8 @@ p <- ggplot() +
   geom_boxplot(aes(x = "TSNA", y=error1), outlier.colour="red", outlier.shape=8,
                outlier.size=1) +
   geom_boxplot(aes(x = "SGD", y=error2), outlier.colour="red", outlier.shape=8,
-             outlier.size=1)
+             outlier.size=1) +
+  geom_boxplot(aes(x = "BSGD", y=error3), outlier.colour="red", outlier.shape=8,
+               outlier.size=1)
 print(p)
 
