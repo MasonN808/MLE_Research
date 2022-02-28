@@ -93,13 +93,13 @@ x=cbind(1,x)
 betas <- runif(p+1, -2, 2)
 hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
-y <- floor(runif(n, min=0, max=7))
+y <- floor(runif(n, min=0, max=7)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
 init=betas+rnorm(p+1,0,1) #add randomness
 
 # print(init)
 library(pracma)
-# print(tail(stochastic_newton_algo(df,init)))
+# print(tail(softmax(df,init)))
 #exact values
 print(df)
 print(betas)
