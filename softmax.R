@@ -14,7 +14,7 @@ prob_softmax <- function(x, Beta, sum){
 #' @param y a number
 #' @param c a number from possible target variables
 #' @return 1 or 0
-ind_func <- function(x, Beta, sum){
+ind_func <- function(y,c){
   if (y == c){
     out = 1
   }
@@ -74,14 +74,25 @@ softmax <- function(df, init = as.vector(rep(1, ncol(df)-1)), batch_num = NULL, 
   
   betas = init
   
-  for(i in 1:iterations){ # TODO: implement subsampling
-    sum = sum(exp(x, betas))
-    p.k = prob_softmax(x, beta, sum)
-    delta.i = ind_func(y, c)
+  batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
+  X <- batch[,1:(ncol(df)-1)] # matrix of data values, ommitting targets
+  Y <- batch[,ncol(df)] # vector of target values
+  
+  B_full = rep(0, ncol(df)-1)
+  
+  for(i in 1:batch_num){
+    N = batch_num
+    Dh = thetas_prev  #init
+    sum = sum(exp(X[i], betas))
+    p.k = prob_softmax(X[i], beta, sum)
+    delta.i = ind_func(Y[i], c)
     s.i = delta.i - p.k
-    tensor_product = s.i %x% p.k # This will be a K x N matrix, %x% := tensor product
+    derivative.1 = s.i %x% X[i] # This will be a K x N matrix, %x% := tensor product
+    phi = p.k - p.k^2
+    derivative.2 = phi %x% (X[i] %*% X[i])
     gradient = 1/N*sum(tensor_product[1:nrow(tensor_product)])
-    i <- i + 1
+    
+    B_full = B_full + inv(derivative.2) %*% derivative.1
   }
 }
 
