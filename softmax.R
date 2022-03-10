@@ -9,6 +9,8 @@ prob_softmax <- function(x, Beta, sum){
   return(out)
 }
 
+
+
 #' Indicator Function
 #' 
 #' @param y a number
@@ -23,6 +25,10 @@ ind_func <- function(y,c){
   }
   return(out)
 }
+
+
+
+
 
 #' Implementation of softmax regression
 #' 
