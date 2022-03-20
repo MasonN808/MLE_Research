@@ -37,7 +37,7 @@ ind_func <- function(y,c){
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the subsample
 #' @return theta
-softmax <- function(df, init = as.vector(rep(1, ncol(df)-1)), batch_num = NULL, exact = NULL){
+softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
   # initialize a data frame to store betas after every iteration
   # if (!is.null(exact)){
   #   # Add error column
@@ -71,13 +71,13 @@ softmax <- function(df, init = as.vector(rep(1, ncol(df)-1)), batch_num = NULL, 
   #   temp_df[1,] <- betas_prev
   # }
   # Check for subsampling
-  if (batch_num.isnull){
-    iterations = nrow(df)
-  }
-  else{
-    iterations = batch_num
-  }
-  
+  # if (batch_num.isnull()){
+  #   iterations = nrow(df)
+  # }
+  # else{
+  #   iterations = batch_num
+  # }
+  print(init)
   betas = init
   
   batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
@@ -88,18 +88,27 @@ softmax <- function(df, init = as.vector(rep(1, ncol(df)-1)), batch_num = NULL, 
   
   for(i in 1:batch_num){
     N = batch_num
-    Dh = thetas_prev  #init
-    sum = sum(exp(X[i], betas))
-    p.k = prob_softmax(X[i], beta, sum)
+    k = 1:K
+    j = 1:N
+
+    print(x[i,])
+    # print(betas)
+    # print(betas[k])
+    sum = sum(exp(X[i,] %*% betas[k]))
+    
+
+    
+    p.k = prob_softmax(X[i,], betas[k], sum)
     delta.i = ind_func(Y[i], c)
     s.i = delta.i - p.k
-    derivative.1 = s.i %x% X[i] # This will be a K x N matrix, %x% := tensor product
+    derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
     phi = p.k - p.k^2
-    derivative.2 = phi %x% (X[i] %*% X[i])
-    gradient = 1/N*sum(tensor_product[1:nrow(tensor_product)])
+    derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
+    # gradient = 1/N*sum(tensor_product[1:nrow(tensor_product)])
     
     B_full = B_full + inv(derivative.2) %*% derivative.1
   }
+  return(B_full)
 }
 
 # Testing
@@ -107,16 +116,19 @@ p <- 5
 n <- 1000
 x <- matrix(rnorm(n * p), n, p)
 x=cbind(1,x)
-betas <- runif(p+1, -2, 2)
+targets <- runif(p+1, -2, 2)
 hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
-p.true <- hc(x %*% betas)
+p.true <- hc(x %*% targets)
 y <- floor(runif(n, min=0, max=7)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
-init=betas+rnorm(p+1,0,1) #add randomness
+init= cbind(rep(0, nrow(df)), matrix(sum(targets+rnorm(p+1,0,1)), ncol(df)-1, nrow(df)-1))  #add randomness
 
 # print(init)
 library(pracma)
-# print(tail(softmax(df,init)))
+# print(df)
+print(cat("targets: ", targets))
+print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
+print(tail(softmax(df, 7, init)))
 #exact values
-print(df)
-print(betas)
+
+
