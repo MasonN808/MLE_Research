@@ -94,16 +94,23 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     print(x[i,])
     # print(betas)
     # print(betas[k])
-    sum = sum(exp(X[i,] %*% betas[k]))
+    sum = sum(exp(X[i,] %*% betas[,k]))
+    print(sum)
     
-
+    p.k = prob_softmax(X[i,], betas[,k], sum)
+    print(cat("p.k: ", p.k))
     
-    p.k = prob_softmax(X[i,], betas[k], sum)
-    delta.i = ind_func(Y[i], c)
+    delta.i = ind_func(Y[i], k)
+    print(delta.i)
+    
     s.i = delta.i - p.k
+    
     derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
+    
     phi = p.k - p.k^2
+    
     derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
+    
     # gradient = 1/N*sum(tensor_product[1:nrow(tensor_product)])
     
     B_full = B_full + inv(derivative.2) %*% derivative.1
@@ -122,14 +129,15 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 d.true <- hc(x %*% targets)
 y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
-init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(K,0,1), ncol = K, nrow = d))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
+# init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
+init <- cbind(rep(0, nrow(df)-1), matrix(1, ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 
 # print(init)
 library(pracma)
 # print(df)
 print(cat("targets: ", targets))
 print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
-print(tail(softmax(df, 7, init)))
+print(cat("OUT: ", tail(softmax(df, K, init))))
 #exact values
 
 
