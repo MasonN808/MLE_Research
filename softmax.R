@@ -103,7 +103,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       delta.i = ind_func(Y[i], j)
       cat(paste("delta.i: ", delta.i, "\n"))
       
-      s.i = delta.i - p.k # K dimensional vector
+      s.i = delta.i - p.k # K dimensional vector //make this its own method 
       cat(paste("s.i: ", s.i, "\n", "--------------------------", "\n"))
       
       #CONTINUE HERE 3/21
@@ -124,7 +124,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 7
+K <- 7 # Start at K=2 first 3/21
 d <- 5
 n <- 100
 x <- matrix(rnorm(n * d), n, d)
