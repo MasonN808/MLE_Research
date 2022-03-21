@@ -91,29 +91,34 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     k = 1:K
     j = 1:N
 
-    print(x[i,])
+    cat(paste("x[i,]: ", x[i,], "\n"))
     # print(betas)
     # print(betas[k])
     sum = sum(exp(X[i,] %*% betas[,k]))
-    print(sum)
-    
-    p.k = prob_softmax(X[i,], betas[,k], sum)
-    print(cat("p.k: ", p.k))
-    
-    delta.i = ind_func(Y[i], k)
-    print(delta.i)
-    
-    s.i = delta.i - p.k
-    
-    derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
-    
-    phi = p.k - p.k^2
-    
-    derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
-    
-    # gradient = 1/N*sum(tensor_product[1:nrow(tensor_product)])
-    
-    B_full = B_full + inv(derivative.2) %*% derivative.1
+
+    for (j in 1:K) {
+      p.k = prob_softmax(X[i,], betas[,j], sum) # d dimensional vector
+      cat(paste("p.k: ", p.k, "\n"))
+      
+      delta.i = ind_func(Y[i], j)
+      cat(paste("delta.i: ", delta.i, "\n"))
+      
+      s.i = delta.i - p.k # K dimensional vector
+      cat(paste("s.i: ", s.i, "\n", "--------------------------", "\n"))
+      
+      #CONTINUE HERE 3/21
+      
+      derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
+      cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
+      
+      phi = p.k - p.k^2 # K by K dimensional matrix
+      cat(paste("phi: ", phi, "\n", "--------------------------", "\n"))
+      
+      derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
+      cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
+      
+      B_full = B_full + inv(derivative.2) %*% derivative.1
+    }
   }
   return(B_full)
 }
