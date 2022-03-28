@@ -97,7 +97,9 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     sum = sum(exp(X[i,] %*% betas[,k]))
 
     for (j in 1:K) {
+      #CONTINUE HERE 3/21 FIX p.k to be a vector
       p.k = prob_softmax(X[i,], betas[,j], sum) # d dimensional vector
+      # cat(paste("betas[,j]: ", betas[,j], "\n"))
       cat(paste("p.k: ", p.k, "\n"))
       
       delta.i = ind_func(Y[i], j)
@@ -106,16 +108,16 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       s.i = delta.i - p.k # K dimensional vector
       cat(paste("s.i: ", s.i, "\n", "--------------------------", "\n"))
       
-      #CONTINUE HERE 3/21
+
       
       derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
-      cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
+      # cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
       
       phi = p.k - p.k^2 # K by K dimensional matrix
-      cat(paste("phi: ", phi, "\n", "--------------------------", "\n"))
+      # cat(paste("phi: ", phi, "\n", "--------------------------", "\n"))
       
       derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
-      cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
+      # cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
       
       B_full = B_full + inv(derivative.2) %*% derivative.1
     }
@@ -124,7 +126,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 7
+K <- 3
 d <- 5
 n <- 100
 x <- matrix(rnorm(n * d), n, d)
