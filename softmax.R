@@ -26,6 +26,15 @@ ind_func <- function(y,c){
   return(out)
 }
 
+#' s.i Function
+#' 
+#' @param delta indicator function
+#' @param prob p.k
+#' @return a number
+s.i <- function(delta,prob){
+  return(delta - prob)
+}
+
 
 
 
@@ -91,40 +100,67 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     k = 1:K
     j = 1:N
 
-    cat(paste("x[i,]: ", x[i,], "\n"))
+    cat(paste("x[i,]: ", X[i,], "\n"))
     # print(betas)
     # print(betas[k])
     sum = sum(exp(X[i,] %*% betas[,k]))
-
+    
+    # Initialization of vectors
+    p.k.vec = c()
+    delta.i.vec = c()
+    s.i.vec = c()
     for (j in 1:K) {
+      
       p.k = prob_softmax(X[i,], betas[,j], sum) # d dimensional vector
-      cat(paste("p.k: ", p.k, "\n"))
+      p.k.vec = append(p.k.vec, p.k)
+      cat(paste("p.k.vec: ", p.k.vec, "\n"))
       
       delta.i = ind_func(Y[i], j)
-      cat(paste("delta.i: ", delta.i, "\n"))
+      delta.i.vec = append(delta.i.vec, delta.i)
+      cat(paste("delta.i.vec: ", delta.i.vec, "\n"))
       
-      s.i = delta.i - p.k # K dimensional vector //make this its own method 
-      cat(paste("s.i: ", s.i, "\n", "--------------------------", "\n"))
+      s = s.i(delta.i, p.k) # K dimensional vector //make this its own method 
+      s.i.vec = append(s.i.vec, s)
+      cat(paste("s.i.vec: ", s.i.vec, "\n"))
+      cat(paste("--------------------------", "\n"))
       
-      #CONTINUE HERE 3/21
-      
-      derivative.1 = 1/N*(s.i %x% X[i]) # This will be a K x N matrix, %x% := tensor product
-      cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
-      
-      phi = p.k - p.k^2 # K by K dimensional matrix
-      cat(paste("phi: ", phi, "\n", "--------------------------", "\n"))
-      
-      derivative.2 = -1/N*(phi %x% (X[i] %*% X[i]))
-      cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
-      
-      B_full = B_full + inv(derivative.2) %*% derivative.1
     }
+    #CONTINUE HERE 3/21
+    
+    derivative.1 = 1/N*matrix(s.i.vec %x% X[i,], ncol = K) # This will be a K x d matrix (currently a vector ), %x% := tensor product
+
+    print("derivative.1")
+    print(derivative.1)
+    # print(length(X[i,]))
+    # print(length(s.i.vec))
+    # print(length(derivative.1))
+    # print(cat("derivative.1: ", derivative.1))
+    
+    phi.1 = matrix(-p.k.vec %x% p.k.vec, ncol = K)# K by K dimensional matrix
+    print("phi.1")
+    print(phi.1)
+    phi.2 = phi.1
+    diag(phi.2) <- p.k.vec - p.k.vec^2
+    print("phi.2")
+    print(phi.2)
+    
+    derivative.2 = -1/N*(phi.2 %x% (X[i,] %*% X[i,]))
+    print("derivative.2")
+    print(derivative.2)
+    
+    print(size(derivative.1))
+    print(size(derivative.2))
+    print(X[i,])
+    print(head(df))
+    print(s.i.vec)
+    
+    betas = betas + inv(derivative.2) %*% derivative.1 # d dimensional array
   }
   return(B_full)
 }
 
 # Testing
-K <- 7 # Start at K=2 first 3/21
+K <- 2 # Start at K=2 first 3/28 then apply inversion-free
 d <- 5
 n <- 100
 x <- matrix(rnorm(n * d), n, d)
@@ -143,6 +179,7 @@ library(pracma)
 print(cat("targets: ", targets))
 print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
 print(cat("OUT: ", tail(softmax(df, K, init))))
+
 #exact values
 
 
