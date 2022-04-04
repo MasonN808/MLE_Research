@@ -152,7 +152,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       B_full = B_full + inv(derivative.2) %*% derivative.1
     # }
   }
-  print(size(B_full))
+  # print(size(B_full))
   # B_full = matrix(B_full, nrow = ncol(df)-1)
   return(t(B_full))
 }
