@@ -144,7 +144,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 3
+K <- 5
 d <- 5
 n <- 100
 x <- matrix(rnorm(n * d), n, d)
@@ -152,10 +152,11 @@ x=cbind(1,x)
 targets <- runif(d+1, -2, 2)
 hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 d.true <- hc(x %*% targets)
+# Redo how y is comouted using 
 y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
-init <- cbind(rep(0, nrow(df)-1), matrix(1, ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
+init <- cbind(rep(0, d+1), matrix(1, ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 
 # print(init)
 library(pracma)
