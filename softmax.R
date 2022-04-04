@@ -113,20 +113,6 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       # print(p.k.vec)
       # print(j)
     }
-    # print(p.k.vec)
-    
-    # for (j in 1:K) {
-      #CONTINUE HERE 3/21 FIX p.k to be a vector
-      # p.k = prob_softmax(X[i,], betas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
-      # cat(paste("betas[,j]: ", betas[,j], "\n"))
-      # cat(paste("p.k: ", p.k, "\n"))
-      
-      # delta.i = ind_func(Y[i], j)
-      # cat(paste("delta.i: ", delta.i, "\n"))
-      
-      # s.i = delta.i - p.k # K dimensional vector
-      # cat(paste("s.i: ", s.i, "\n", "--------------------------", "\n"))
-      
       derivative.1 = 1/N*(s.i.vec %x% t(X[i,])) # This will be a K x d matrix, %x% := tensor product
       # cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
       # print(derivative.1)
