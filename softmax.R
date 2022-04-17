@@ -153,8 +153,24 @@ targets <- runif(d+1, -2, 2)
 hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 d.true <- hc(x %*% targets)
 
-yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1)
+yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1) # Do a normal distribution across Betas
 print(yBetas)
+for(i in 1:n){
+  k = 1:K
+  j = 1:N
+  # cat(paste("x[i,]: ", x[i,], "\n"))
+  # print(betas)
+  # print(betas[k])
+  sum = sum(exp(X[i,] %*% betas[,k]))
+  
+  p.k.vec = c()
+  for (j in 1:(K+1)) {
+    p.k = prob_softmax(X[i,], betas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
+    # cat(paste("betas[,j]: ", betas[,j], "\n"))
+    # cat(paste("p.k: ", p.k, "\n"))
+    p.k.vec <- c(p.k.vec, p.k)
+  }
+}
 
 y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
