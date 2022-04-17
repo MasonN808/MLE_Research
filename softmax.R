@@ -39,44 +39,44 @@ ind_func <- function(y,c){
 #' @return theta
 softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
   # initialize a data frame to store betas after every iteration
-  # if (!is.null(exact)){
-  #   # Add error column
-  #   m <- matrix(NA, ncol = ncol(df), nrow = 1)
-  # }
-  # else{
-  #   m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
-  # }
-  # 
-  # temp_df <- data.frame(m, check.names = FALSE)
-  # 
-  # names <- c()
-  # # make a vector of names for columns
-  # for (i in 2:ncol(df)-2) {
-  #   names <- append(names, paste0("Betas.", i))
-  # }
-  # if (!is.null(exact)){
-  #   ## Add error column
-  #   names <- append(names, "error")
-  # }
-  # # assign the names vector to the column names of temp data frame
-  # # print(c(ncol(temp_df), length(names)))
-  # colnames(temp_df) <- names
-  # 
-  # if (!is.null(exact)){
-  #   ## Add error
-  #   error = norm_L2(betas_prev - exact)
-  #   temp_df <- na.omit(rbind(temp_df, c(betas_prev, error)))
-  # }
-  # else{
-  #   temp_df[1,] <- betas_prev
-  # }
+  if (!is.null(exact)){
+    # Add error column
+    m <- matrix(NA, ncol = ncol(df), nrow = 1)
+  }
+  else{
+    m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
+  }
+
+  temp_df <- data.frame(m, check.names = FALSE)
+
+  names <- c()
+  # make a vector of names for columns
+  for (i in 2:ncol(df)-2) {
+    names <- append(names, paste0("Betas.", i))
+  }
+  if (!is.null(exact)){
+    ## Add error column
+    names <- append(names, "error")
+  }
+  # assign the names vector to the column names of temp data frame
+  # print(c(ncol(temp_df), length(names)))
+  colnames(temp_df) <- names
+
+  if (!is.null(exact)){
+    ## Add error
+    error = norm_L2(betas_prev - exact)
+    temp_df <- na.omit(rbind(temp_df, c(betas_prev, error)))
+  }
+  else{
+    temp_df[1,] <- betas_prev
+  }
   # Check for subsampling
-  # if (batch_num.isnull()){
-  #   iterations = nrow(df)
-  # }
-  # else{
-  #   iterations = batch_num
-  # }
+  if (batch_num.isnull()){
+    iterations = nrow(df)
+  }
+  else{
+    iterations = batch_num
+  }
   print(init)
   betas = init
   
@@ -152,7 +152,10 @@ x=cbind(1,x)
 targets <- runif(d+1, -2, 2)
 hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 d.true <- hc(x %*% targets)
-# Redo how y is comouted using 
+
+yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1)
+print(yBetas)
+
 y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 df <- cbind(x,y)
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
