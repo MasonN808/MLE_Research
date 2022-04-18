@@ -28,8 +28,6 @@ ind_func <- function(y,c){
 
 
 
-
-
 #' Implementation of softmax regression
 #' 
 #' @param df A data frame.
@@ -37,7 +35,7 @@ ind_func <- function(y,c){
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the subsample
 #' @return theta
-softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
+softmax <- function(df, K, betas_prev = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
   # initialize a data frame to store betas after every iteration
   if (!is.null(exact)){
     # Add error column
@@ -70,37 +68,42 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   else{
     temp_df[1,] <- betas_prev
   }
-  # Check for subsampling
-  if (batch_num.isnull()){
-    iterations = nrow(df)
-  }
-  else{
-    iterations = batch_num
-  }
-  print(init)
-  betas = init
+  # # Check for subsampling
+  # if (batch_num.isnull()){
+  #   iterations = nrow(df)
+  # }
+  # else{
+  #   iterations = batch_num
+  # }
+  # print(betas_prev)
+  betas = betas_prev
+  print(size(betas_prev))
   
   batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
   X <- batch[,1:(ncol(df)-1)] # matrix of data values, ommitting targets
   Y <- batch[,ncol(df)] # vector of target values
   
-  B_full = rep(0, ncol(df)-1)
-  # print(size(B_full))
+  B_full = matrix(0, ncol = K+1, nrow = d+1)
+  B_full = betas_prev
   
-  for(i in 1:batch_num){
-    N = batch_num
-    k = 1:K
+  
+  N = nrow(df)
+  for(i in 1:N){ # Looping through each row in the df
+    k = 1:(K+1)
     j = 1:N
 
     # cat(paste("x[i,]: ", x[i,], "\n"))
     # print(betas)
     # print(betas[k])
-    sum = sum(exp(X[i,] %*% betas[,k]))
-    
+    # print(size(X[i,]))
+    # print(size(betas[,k]))
+    # print(exp(X[i,] %*% betas[,k]))
+    sum = sum(exp(X[i,] %*% B_full[,k]))
+    print(sum)
     p.k.vec = c()
     s.i.vec = c()
-    for (j in 1:(K+1)) {
-      p.k = prob_softmax(X[i,], betas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
+    for (j in 1:(K+1)) { # Looping through each column in the Betas
+      p.k = prob_softmax(X[i,], B_full[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
       # cat(paste("betas[,j]: ", betas[,j], "\n"))
       # cat(paste("p.k: ", p.k, "\n"))
       p.k.vec <- c(p.k.vec, p.k)
@@ -136,10 +139,13 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       # cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
       
       B_full = B_full + inv(derivative.2) %*% derivative.1
+      
+      print(B_full)
     # }
   }
   # print(size(B_full))
   # B_full = matrix(B_full, nrow = ncol(df)-1)
+  print(size(B_full))
   return(t(B_full))
 }
 
@@ -154,39 +160,39 @@ targets <- runif(d+1, -2, 2)
 # d.true <- hc(x %*% targets)
 
 
-yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1) # Do a normal distribution across Betas we want to estimate
-print(yBetas)
+yBetas<- cbind(rep(0, nrow(df)-1), matrix(rnorm((K)*(d+1)), ncol = K, nrow = d+1)) # Do a normal distribution across Betas we want to estimate
+# print(yBetas)
 
 yTargets <- c()
 for(i in 1:n){ # Looping through each row in the dataset
-  k = 1:(K+1)
+  k = 1:(K)
   j = 1:n
   # cat(paste("x[i,]: ", x[i,], "\n"))
   # print(betas)
   # print(betas[k])
-  # print(yBetas[,k])
-  # print(x[i,])
+  # print(size(yBetas[,k]))
+  # print(size(x[i,]))
   # print(exp(x[i,] %*% yBetas[,k]))
   sum = sum(exp(x[i,] %*% yBetas[,k]))
   # print(sum)
   p.k.vec = c()
-  for (j in 1:(K+1)) { # Looping through each column in the Betas
+  for (j in 1:(K)) { # Looping through each column in the Betas
     p.k = prob_softmax(x[i,], yBetas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
     # cat(paste("betas[,j]: ", betas[,j], "\n"))
     # cat(paste("p.k: ", p.k, "\n"))
     p.k.vec <- c(p.k.vec, p.k)
   }
-  print(p.k.vec)
+  # print(p.k.vec)
   # print(sum(p.k.vec))
-  yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec)) - 1) # find the index with the max probability and minus 1 for indexing
+  yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec))-1) # find the index with the max probability and minus 1 for indexing
 }
 
-print(yTargets)
+# print(yTargets)
 
 # y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
 
 df <- cbind(x,yTargets)
-print(df)
+
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 init <- cbind(rep(0, d+1), matrix(1, ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 
@@ -197,6 +203,7 @@ library(pracma)
 # print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
 # print(cat("OUT: ", (softmax(df, K, init))))
 print(softmax(df, K, init))
-#exact values
 
+#exact values
+print(yBetas)
 
