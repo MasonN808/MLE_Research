@@ -144,44 +144,57 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 5
-d <- 5
-n <- 100
+K <- 5 # Number of classes
+d <- 5 # Number of columns
+n <- 100 # Number of rows
 x <- matrix(rnorm(n * d), n, d)
-x=cbind(1,x)
+x <- cbind(1,x)
 targets <- runif(d+1, -2, 2)
-hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
-d.true <- hc(x %*% targets)
+# hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
+# d.true <- hc(x %*% targets)
 
-yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1) # Do a normal distribution across Betas
+
+yBetas<- matrix(rnorm((K+1)*(d+1)), ncol = K+1, nrow = d+1) # Do a normal distribution across Betas we want to estimate
 print(yBetas)
-for(i in 1:n){
-  k = 1:K
-  j = 1:N
+
+yTargets <- c()
+for(i in 1:n){ # Looping through each row in the dataset
+  k = 1:(K+1)
+  j = 1:n
   # cat(paste("x[i,]: ", x[i,], "\n"))
   # print(betas)
   # print(betas[k])
-  sum = sum(exp(X[i,] %*% betas[,k]))
-  
+  # print(yBetas[,k])
+  # print(x[i,])
+  # print(exp(x[i,] %*% yBetas[,k]))
+  sum = sum(exp(x[i,] %*% yBetas[,k]))
+  # print(sum)
   p.k.vec = c()
-  for (j in 1:(K+1)) {
-    p.k = prob_softmax(X[i,], betas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
+  for (j in 1:(K+1)) { # Looping through each column in the Betas
+    p.k = prob_softmax(x[i,], yBetas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
     # cat(paste("betas[,j]: ", betas[,j], "\n"))
     # cat(paste("p.k: ", p.k, "\n"))
     p.k.vec <- c(p.k.vec, p.k)
   }
+  print(p.k.vec)
+  # print(sum(p.k.vec))
+  yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec)) - 1) # find the index with the max probability and minus 1 for indexing
 }
 
-y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
-df <- cbind(x,y)
+print(yTargets)
+
+# y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
+
+df <- cbind(x,yTargets)
+print(df)
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 init <- cbind(rep(0, d+1), matrix(1, ncol = K, nrow = d+1))  #K by d dimensional matrix //TODO: make it MORE random (3/20)
 
-# print(init)
+print(init)
 library(pracma)
 # print(df)
-print(cat("targets: ", targets))
-print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
+# print(cat("targets: ", targets))
+# print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
 # print(cat("OUT: ", (softmax(df, K, init))))
 print(softmax(df, K, init))
 #exact values
