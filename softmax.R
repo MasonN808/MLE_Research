@@ -136,7 +136,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,])))
     
-    epsilon = 10^(-10)
+    epsilon = 10^(-3)
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
     
@@ -163,7 +163,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 # Testing
 K <- 2 # Number of classes
 d <- 4 # Number of columns
-n <- 10 # Number of rows
+n <- 100 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
