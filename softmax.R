@@ -112,6 +112,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     # cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
     cat(paste("derivative.1: \n -------------------------- \n"))
     print(derivative.1)
+    cat(paste("\n -------------------------- \n"))
     
     # initiate phi matrix of just 0s
     phi = matrix(rep(0, (K-1)*(K-1)), nrow = K-1, byrow = TRUE)
@@ -130,8 +131,10 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     tempP.k.vec <- p.k.vec
     
     diag(phi) <- tempP.k.vec - (tempP.k.vec*tempP.k.vec) # faster than just squaring using ^2
-    cat(paste("phi \n -------------------------- \n"))
+    cat(paste("PHI \n -------------------------- \n"))
     print(phi)
+    cat(paste("\n -------------------------- \n"))
+    # print(phi)
     # cat(paste(" x test: ", X[i,] %*% (X[i,]), "\n", "--------------------------", "\n"))
     
     derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,])))
@@ -140,16 +143,21 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
     
-    print(derivative.2)
+    # print(derivative.2)
     # cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
     # print(ncol(derivative.1))
+    
+    
     print(size(derivative.1))
     print(size(inv(derivative.2)))
     print(size(B_full))
     
     # B_full = c(B_full) # turn into a vector
-    print(inv(derivative.2))
-    B_full = B_full + (inv(derivative.2)) %*% derivative.1
+    cat(paste("Hessian \n -------------------------- \n"))
+    print(derivative.2)
+    cat(paste("\n -------------------------- \n"))
+    
+    B_full = B_full + matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1)
     # B_full = cbind(0, B_full)
     
     print(B_full)
@@ -161,9 +169,9 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 2 # Number of classes
+K <- 3 # Number of classes
 d <- 4 # Number of columns
-n <- 100 # Number of rows
+n <- 10 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
@@ -181,14 +189,14 @@ for(i in 1:n){ # Looping through each row in the dataset
   k = 1:(K-1)
   j = 1:n
 
-  sum = sum(exp(x[i,] %*% yBetas[,k]))
+  sum = sum(1+ exp(x[i,] %*% yBetas[,k]))
 
   p.k.vec = c()
   for (j in 1:(K-1)) { # Looping through each column in the Betas
     p.k = prob_softmax(x[i,], yBetas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
-
     p.k.vec <- c(p.k.vec, p.k)
   }
+  # print(sum(p.k.vec))
   yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec))-1) # find the index with the max probability and minus 1 for indexing
 }
 
