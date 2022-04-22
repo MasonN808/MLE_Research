@@ -110,17 +110,20 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     sum = 1 + sum(exp(X[i,] %*% B_full[,k]))
     for (j in 1:(K-1)) { # Looping through each column in the Betas to populate s.i.vec and p.k.vec
       p.k = prob_softmax(X[i,], B_full[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
-
       p.k.vec <- c(p.k.vec, p.k)
-      delta.i = ind_func(Y[i], j)
       
-      s.i = delta.i - p.k # K dimensional vector
-
+      #This tells us if our predication using B_full is correct using the indicator function
+      delta.i = ind_func(Y[i], j)
+      s.i = delta.i - p.k # K dimensional vector 
       s.i.vec <- c(s.i.vec, s.i)
     }
     
     cat(paste("p.k.vec: \n-------------------------- \n"))
     print(p.k.vec)
+    cat(paste("-------------------------- \n"))
+    
+    cat(paste("s.i.vec: \n-------------------------- \n"))
+    print(s.i.vec)
     cat(paste("-------------------------- \n"))
 
     derivative.1 = (1/N)*(s.i.vec %x% (X[i,])) # This will be a K x d matrix, %x% := tensor product
@@ -150,7 +153,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,]))) # Kd x Kd matrix
     
-    epsilon = 10^(-6)
+    epsilon = 10^(-10)
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
     
@@ -163,18 +166,16 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     print(derivative.2)
     cat(paste("-------------------------- \n"))
     
-    B_full = B_full + matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1)
+    B_full = B_full + matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
     # B_full = cbind(0, B_full)
 
   }
-  # print(size(B_full))
-  # B_full = matrix(B_full, nrow = ncol(df)-1)
-  # print(size(B_full))
+
   return(B_full)
 }
 
 # Testing
-K <- 2 # Number of classes
+K <- 3 # Number of classes
 d <- 4 # Number of columns
 n <- 10 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
@@ -186,6 +187,8 @@ x <- cbind(1,x)
 
 # yBetas<- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)) # K x d Dimensional matrix; Do a normal distribution across Betas we want to estimate
 yBetas<-matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
+
+# yBetas <- matrix(c(1,2,3,4), ncol = K-1, nrow = d)
 # yBetas[d,K] <- 1000
 # print(yBetas)
 
@@ -193,13 +196,14 @@ yTargets <- c()
 for(i in 1:n){ # Looping through each row in the dataset
   k = 1:(K-1)
   j = 1:n
-
-  sum = sum(1+ exp(x[i,] %*% yBetas[,k]))
+  
+  sum = 0
+  sum = 1 + sum(exp(x[i,] %*% yBetas[,k]))
 
   p.k.vec = c()
   for (j in 1:(K-1)) { # Looping through each column in the Betas
     p.k = prob_softmax(x[i,], yBetas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
-    p.k.vec <- c(p.k.vec, p.k)
+    p.k.vec <- c(p.k, p.k.vec)
   }
   p.k.vec <- c(1-sum(p.k.vec), p.k.vec)
   # print(sum(p.k.vec))
