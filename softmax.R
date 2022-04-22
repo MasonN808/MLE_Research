@@ -76,23 +76,38 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   #   iterations = batch_num
   # }
   
-  batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
-  X <- batch[,1:(ncol(df)-1)] # matrix of data values, ommitting targets
-  Y <- batch[,ncol(df)] # vector of target values
+  # batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
+  
+  X <- df[,1:ncol(df)-1]
+  # X <- batch[,1:(ncol(df)-1)] # matrix of data values, ommitting targets
+  cat(paste("X: \n-------------------------- \n"))
+  print(X)
+  cat(paste("-------------------------- \n"))
+  
+  Y <- df[,ncol(df)]
+  # Y <- batch[,ncol(df)] # vector of target values
+  cat(paste("Y: \n-------------------------- \n"))
+  print(Y)
+  cat(paste("-------------------------- \n"))
   
   # B_full = matrix(0, ncol = K, nrow = d+1)
   B_full = init
-  print((B_full))
+  # print((B_full))
   
   N = nrow(df)
   for(i in 1:N){ # Looping through each row in the df
+    cat(paste("B_full: \n-------------------------- \n"))
+    print(B_full)
+    cat(paste("-------------------------- \n"))
+    
     k = 1:(K-1)
     j = 1:N
 
-    sum = 1 + sum(exp(X[i,] %*% B_full[,k]))
-    # print(sum)
+    # Reinitialize variables
     p.k.vec = c()
     s.i.vec = c()
+    sum = 0
+    sum = 1 + sum(exp(X[i,] %*% B_full[,k]))
     for (j in 1:(K-1)) { # Looping through each column in the Betas to populate s.i.vec and p.k.vec
       p.k = prob_softmax(X[i,], B_full[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
 
@@ -100,25 +115,23 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       delta.i = ind_func(Y[i], j)
       
       s.i = delta.i - p.k # K dimensional vector
-      # print(delta.i)
-      # print(p.k)
-      s.i.vec <- c(s.i.vec, s.i)
 
+      s.i.vec <- c(s.i.vec, s.i)
     }
-    # print(sum(p.k.vec))
-    # print(size(s.i.vec))
-    # print(X[i,])
-    derivative.1 = ((1/N)*(s.i.vec %x% (X[i,]))) # This will be a K x d matrix, %x% := tensor product
-    # cat(paste("derivative.1: ", derivative.1, "\n", "--------------------------", "\n"))
-    cat(paste("derivative.1: \n -------------------------- \n"))
+    
+    cat(paste("p.k.vec: \n-------------------------- \n"))
+    print(p.k.vec)
+    cat(paste("-------------------------- \n"))
+
+    derivative.1 = (1/N)*(s.i.vec %x% (X[i,])) # This will be a K x d matrix, %x% := tensor product
+
+    cat(paste("derivative.1: \n-------------------------- \n"))
     print(derivative.1)
     cat(paste("-------------------------- \n"))
     
     # initiate phi matrix of just 0s
     phi = matrix(rep(0, (K-1)*(K-1)), nrow = K-1, byrow = TRUE)
-    # print(p.k.vec[K])
-    # print(size(phi))
-    # Populate Phi matrix
+    
     for(j in 1:(K-1)){
       for(k in 1:(K-1)){
         # print(p.k.vec[k]*p.k.vec[j])
@@ -126,27 +139,20 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
         # cat(paste("phi: ", phi, "\n", "--------------------------", "\n"))
       }
     }
-    # print(phi)
     
     tempP.k.vec <- p.k.vec
     
     diag(phi) <- tempP.k.vec - (tempP.k.vec*tempP.k.vec) # faster than just squaring using ^2
-    cat(paste("PHI \n -------------------------- \n"))
+    
+    cat(paste("PHI: \n-------------------------- \n"))
     print(phi)
     cat(paste("-------------------------- \n"))
-    # print(phi)
-    # cat(paste(" x test: ", X[i,] %*% (X[i,]), "\n", "--------------------------", "\n"))
     
-    derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,])))
+    derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,]))) # Kd x Kd matrix
     
     epsilon = 10^(-6)
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
-    
-    # print(derivative.2)
-    # cat(paste("derivative.2: ", derivative.2, "\n", "--------------------------", "\n"))
-    # print(ncol(derivative.1))
-    
     
     print(size(derivative.1))
     print(size(inv(derivative.2)))
@@ -159,8 +165,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     B_full = B_full + matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1)
     # B_full = cbind(0, B_full)
-    
-    print(B_full)
+
   }
   # print(size(B_full))
   # B_full = matrix(B_full, nrow = ncol(df)-1)
@@ -196,6 +201,7 @@ for(i in 1:n){ # Looping through each row in the dataset
     p.k = prob_softmax(x[i,], yBetas[,j], sum) # K dimensional vector : betas[,j] d dimesional : X[i,] d dimensional
     p.k.vec <- c(p.k.vec, p.k)
   }
+  p.k.vec <- c(1-sum(p.k.vec), p.k.vec)
   # print(sum(p.k.vec))
   yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec))-1) # find the index with the max probability and minus 1 for indexing
 }
@@ -211,12 +217,14 @@ df <- cbind(x,yTargets)
 init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 
 # print(init)
-# print(head(df))
+
 library(pracma)
 # print(df)
 # print(cat("targets: ", targets))
 # print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
 # print(cat("OUT: ", (softmax(df, K, init))))
+
+# print(df)
 print(softmax(df, K, init))
 
 #exact values
