@@ -112,7 +112,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       p.k.vec <- c(p.k.vec, p.k)
       
       #This tells us if our predication using B_full is correct using the indicator function
-      delta.i = ind_func(Y[i], j)
+      delta.i = ind_func(Y[i], j) # 0 or 1
       s.i = delta.i - p.k # K dimensional vector 
       s.i.vec <- c(s.i.vec, s.i)
     }
