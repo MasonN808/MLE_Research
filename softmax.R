@@ -95,13 +95,12 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   # print((B_full))
   
   N = nrow(df)
+  k = 1:(K-1)
+  j = 1:N
   for(i in 1:N){ # Looping through each row in the df
     cat(paste("B_full: \n-------------------------- \n"))
     print(B_full)
     cat(paste("-------------------------- \n"))
-    
-    k = 1:(K-1)
-    j = 1:N
 
     # Reinitialize variables
     p.k.vec = c()
@@ -175,7 +174,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 }
 
 # Testing
-K <- 3 # Number of classes
+K <- 2 # Number of classes
 d <- 4 # Number of columns
 n <- 10 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
@@ -220,7 +219,7 @@ df <- cbind(x,yTargets)
 # init <- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d))  #K by d dimensional matrix
 init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 
-# print(init)
+print(init)
 
 library(pracma)
 # print(df)
