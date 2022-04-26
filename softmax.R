@@ -26,6 +26,22 @@ ind_func <- function(y,c){
   return(out)
 }
 
+# Just use the L2 norm
+#' #' Accuracy Function
+#' #' 
+#' #' @param input a vector, B_full
+#' #' @param expected an expected vector for B_full
+#' #' @return 
+#' accuracy <- function(input, expected){
+#'   if (y == c){
+#'     out = 1
+#'   }
+#'   else{
+#'     out = 0
+#'   }
+#'   return(out)
+#' }
+
 
 
 #' Implementation of softmax regression
@@ -36,68 +52,65 @@ ind_func <- function(y,c){
 #' @param batch_num number of data rows in the subsample
 #' @return theta
 softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
-  # # initialize a data frame to store betas after every iteration
-  # if (!is.null(exact)){
-  #   # Add error column
-  #   m <- matrix(NA, ncol = ncol(df), nrow = 1)
-  # }
-  # else{
-  #   m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
-  # }
-  # 
-  # temp_df <- data.frame(m, check.names = FALSE)
-  # 
-  # names <- c()
-  # # make a vector of names for columns
+  B_full = init
+  # initialize a data frame to store betas after every iteration
+  if (!is.null(exact)){
+    # Add error column
+    # m <- matrix(NA, ncol = ncol(df), nrow = 1)
+    m <- matrix(NA, ncol = 1, nrow = 1)
+  }
+  else{
+    m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
+  }
+
+  temp_df <- data.frame(m, check.names = FALSE)
+
+  names <- c()
+  # make a vector of names for columns
   # for (i in 2:ncol(df)-2) {
   #   names <- append(names, paste0("Betas.", i))
   # }
-  # if (!is.null(exact)){
-  #   ## Add error column
-  #   names <- append(names, "error")
-  # }
-  # # assign the names vector to the column names of temp data frame
-  # # print(c(ncol(temp_df), length(names)))
-  # colnames(temp_df) <- names
-  # 
-  # if (!is.null(exact)){
-  #   ## Add error
-  #   error = norm_L2(betas_prev - exact)
-  #   temp_df <- na.omit(rbind(temp_df, c(betas_prev, error)))
-  # }
-  # else{
-  #   temp_df[1,] <- betas_prev
-  # }
-  # # Check for subsampling
-  # if (batch_num.isnull()){
-  #   iterations = nrow(df)
-  # }
-  # else{
-  #   iterations = batch_num
-  # }
-  
-  # batch <- df[sample(nrow(df), size=batch_num, replace=FALSE),]  # take a random subsample from the data
+  if (!is.null(exact)){
+    ## Add error column
+    names <- append(names, "error")
+  }
+  # assign the names vector to the column names of temp data frame
+  # print(c(ncol(temp_df), length(names)))
+  colnames(temp_df) <- names
+
+  if (!is.null(exact)){
+    ## Add error
+    error = 0
+    for (i in 1: length(B_full[1,])) {
+      error = error + norm_L2(B_full[,i] - exact[,i])
+    }
+    error = error/length(B_full[1,])
+    # temp_df <- na.omit(rbind(temp_df, c(B_full, error)))
+    temp_df[1,] <- error
+  }
+  else{
+    temp_df[1,] <- B_full
+  }
   
   X <- df[,1:ncol(df)-1]
-  # X <- batch[,1:(ncol(df)-1)] # matrix of data values, ommitting targets
+
   cat(paste("X: \n-------------------------- \n"))
   print(X)
   cat(paste("-------------------------- \n"))
   
   Y <- df[,ncol(df)]
-  # Y <- batch[,ncol(df)] # vector of target values
+
   cat(paste("Y: \n-------------------------- \n"))
   print(Y)
   cat(paste("-------------------------- \n"))
   
   # B_full = matrix(0, ncol = K, nrow = d+1)
-  B_full = init
   # print((B_full))
   
   N = nrow(df)
   k = 1:(K-1)
   j = 1:N
-  alpha = .01 # learning rate
+  alpha = .02 # learning rate
   for(i in 1:N){ # Looping through each row in the df
     cat(paste("B_full: \n-------------------------- \n"))
     print(B_full)
@@ -167,18 +180,32 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     print(derivative.2)
     cat(paste("-------------------------- \n"))
     
-    B_full = B_full + alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
+    B_full = B_full - alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
     # B_full = cbind(0, B_full)
+    
+    if (!is.null(exact)){
+      ## Add error
+      error = 0
+      for (i in 1: length(B_full[1,])) {
+        error = error + norm_L2(B_full[,i] - exact[,i])
+      }
+      error = error/length(B_full[1,])
+      # temp_df <- na.omit(rbind(temp_df, c(B_full, error)))
+      temp_df <- rbind(temp_df, error)
+    }
+    else{
+      temp_df[1,] <- B_full
+    }
 
   }
-
+  print(tail(temp_df))
   return(B_full)
 }
 
 # Testing
 K <- 2 # Number of classes
-d <- 4 # Number of columns/features
-n <- 100 # Number of rows
+d <- 5 # Number of columns/features
+n <- 2000 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
@@ -187,9 +214,10 @@ x <- cbind(1,x)
 
 
 # yBetas<- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)) # K x d Dimensional matrix; Do a normal distribution across Betas we want to estimate
-yBetas<-matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
+# yBetas<-matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 
-# yBetas <- matrix(c(1,2,3,4), ncol = K-1, nrow = d)
+
+yBetas <- matrix(c(-1,2,3,-4, 5), ncol = K-1, nrow = d)
 # yBetas[d,K] <- 1000
 # print(yBetas)
 
@@ -219,7 +247,8 @@ df <- cbind(x,yTargets)
 
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix
 # init <- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d))  #K by d dimensional matrix
-init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
+# init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
+init <- matrix(rep(1), ncol = K-1, nrow = d)
 
 print(init)
 
@@ -230,8 +259,8 @@ library(pracma)
 # print(cat("OUT: ", (softmax(df, K, init))))
 
 # print(df)
-print(softmax(df, K, init))
-
+print(softmax(df, K, init, exact = yBetas))
+# df = softmax(df, K, init, exact = yBetas)
 #exact values
 print(yBetas)
 

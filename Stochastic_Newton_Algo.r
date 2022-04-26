@@ -86,7 +86,7 @@ init=betas+rnorm(p+1,0,1)
 
 print(init)
 library(pracma)
-print(tail(stochastic_newton_algo(df,init)))
+print(tail(stochastic_newton_algo(df,init, betas)))
 #exact values
 print(betas)
 
