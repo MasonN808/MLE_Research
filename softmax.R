@@ -97,6 +97,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   N = nrow(df)
   k = 1:(K-1)
   j = 1:N
+  alpha = .01 # learning rate
   for(i in 1:N){ # Looping through each row in the df
     cat(paste("B_full: \n-------------------------- \n"))
     print(B_full)
@@ -165,7 +166,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     print(derivative.2)
     cat(paste("-------------------------- \n"))
     
-    B_full = B_full + matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
+    B_full = B_full + alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
     # B_full = cbind(0, B_full)
 
   }
@@ -175,8 +176,8 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 
 # Testing
 K <- 2 # Number of classes
-d <- 4 # Number of columns
-n <- 10 # Number of rows
+d <- 4 # Number of columns/features
+n <- 100 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
