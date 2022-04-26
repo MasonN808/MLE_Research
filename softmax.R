@@ -135,6 +135,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     # initiate phi matrix of just 0s
     phi = matrix(rep(0, (K-1)*(K-1)), nrow = K-1, byrow = TRUE)
     
+    # Populate the phi matrix
     for(j in 1:(K-1)){
       for(k in 1:(K-1)){
         # print(p.k.vec[k]*p.k.vec[j])
