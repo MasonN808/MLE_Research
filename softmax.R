@@ -110,7 +110,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   N = nrow(df)
   k = 1:(K-1)
   j = 1:N
-  alpha = .02 # learning rate
+  alpha = .01 # learning rate
   for(i in 1:N){ # Looping through each row in the df
     cat(paste("B_full: \n-------------------------- \n"))
     print(B_full)
@@ -167,7 +167,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,]))) # Kd x Kd matrix
     
-    epsilon = 10^(-10)
+    epsilon = 10^(-8)
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
     
@@ -180,7 +180,7 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     print(derivative.2)
     cat(paste("-------------------------- \n"))
     
-    B_full = B_full - alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
+    B_full = B_full + alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
     # B_full = cbind(0, B_full)
     
     if (!is.null(exact)){
@@ -198,14 +198,14 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     }
 
   }
-  print(tail(temp_df))
+  print((temp_df))
   return(B_full)
 }
 
 # Testing
 K <- 2 # Number of classes
 d <- 5 # Number of columns/features
-n <- 2000 # Number of rows
+n <- 200 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
@@ -217,7 +217,7 @@ x <- cbind(1,x)
 # yBetas<-matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 
 
-yBetas <- matrix(c(-1,2,3,-4, 5), ncol = K-1, nrow = d)
+yBetas <- matrix(rep(1), ncol = K-1, nrow = d)
 # yBetas[d,K] <- 1000
 # print(yBetas)
 
@@ -248,7 +248,7 @@ df <- cbind(x,yTargets)
 # init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix
 # init <- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d))  #K by d dimensional matrix
 # init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
-init <- matrix(rep(1), ncol = K-1, nrow = d)
+init <- matrix(rep(-1), ncol = K-1, nrow = d)
 
 print(init)
 
