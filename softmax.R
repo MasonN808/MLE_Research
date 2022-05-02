@@ -51,7 +51,7 @@ ind_func <- function(y,c){
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the subsample
 #' @return theta
-softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), exact = NULL){
+softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), eta = .01, exact = NULL, DEBUG = FALSE){
   B_full = init
   # initialize a data frame to store betas after every iteration
   if (!is.null(exact)){
@@ -93,16 +93,18 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   }
   
   X <- df[,1:ncol(df)-1]
-
-  cat(paste("X: \n-------------------------- \n"))
-  print(X)
-  cat(paste("-------------------------- \n"))
+  if(DEBUG){
+    cat(paste("X: \n-------------------------- \n"))
+    print(X)
+    cat(paste("-------------------------- \n"))
+  }
   
   Y <- df[,ncol(df)]
-
-  cat(paste("Y: \n-------------------------- \n"))
-  print(Y)
-  cat(paste("-------------------------- \n"))
+  if(DEBUG){
+    cat(paste("Y: \n-------------------------- \n"))
+    print(Y)
+    cat(paste("-------------------------- \n"))
+  }
   
   # B_full = matrix(0, ncol = K, nrow = d+1)
   # print((B_full))
@@ -110,11 +112,12 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
   N = nrow(df)
   k = 1:(K-1)
   j = 1:N
-  alpha = .01 # learning rate
   for(i in 1:N){ # Looping through each row in the df
-    cat(paste("B_full: \n-------------------------- \n"))
-    print(B_full)
-    cat(paste("-------------------------- \n"))
+    if(DEBUG){
+      cat(paste("B_full: \n-------------------------- \n"))
+      print(B_full)
+      cat(paste("-------------------------- \n"))
+    }
 
     # Reinitialize variables
     p.k.vec = c()
@@ -131,19 +134,23 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       s.i.vec <- c(s.i.vec, s.i)
     }
     
-    cat(paste("p.k.vec: \n-------------------------- \n"))
-    print(p.k.vec)
-    cat(paste("-------------------------- \n"))
-    
-    cat(paste("s.i.vec: \n-------------------------- \n"))
-    print(s.i.vec)
-    cat(paste("-------------------------- \n"))
+    if(DEBUG){
+      cat(paste("p.k.vec: \n-------------------------- \n"))
+      print(p.k.vec)
+      cat(paste("-------------------------- \n"))
+      
+      cat(paste("s.i.vec: \n-------------------------- \n"))
+      print(s.i.vec)
+      cat(paste("-------------------------- \n"))
+    }
 
     derivative.1 = (1/N)*(s.i.vec %x% (X[i,])) # This will be a K x d matrix, %x% := tensor product
-
-    cat(paste("derivative.1: \n-------------------------- \n"))
-    print(derivative.1)
-    cat(paste("-------------------------- \n"))
+    
+    if(DEBUG){
+      cat(paste("derivative.1: \n-------------------------- \n"))
+      print(derivative.1)
+      cat(paste("-------------------------- \n"))
+    }
     
     # initiate phi matrix of just 0s
     phi = matrix(rep(0, (K-1)*(K-1)), nrow = K-1, byrow = TRUE)
@@ -160,10 +167,11 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     tempP.k.vec <- p.k.vec
     
     diag(phi) <- tempP.k.vec - (tempP.k.vec*tempP.k.vec) # faster than just squaring using ^2
-    
-    cat(paste("PHI: \n-------------------------- \n"))
-    print(phi)
-    cat(paste("-------------------------- \n"))
+    if(DEBUG){
+      cat(paste("PHI: \n-------------------------- \n"))
+      print(phi)
+      cat(paste("-------------------------- \n"))
+    }
     
     derivative.2 = -(1/N)*(phi %x% (X[i,] %*% t(X[i,]))) # Kd x Kd matrix
     
@@ -171,16 +179,17 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
     
     diag(derivative.2) = diag(derivative.2) + epsilon # Make it nonsingular
     
-    print(size(derivative.1))
-    print(size(inv(derivative.2)))
-    print(size(B_full))
+    if(DEBUG){
+      print(size(derivative.1))
+      print(size(inv(derivative.2)))
+      print(size(B_full))
+
+      cat(paste("Hessian \n -------------------------- \n"))
+      print(derivative.2)
+      cat(paste("-------------------------- \n"))
+    }
     
-    # B_full = c(B_full) # turn into a vector
-    cat(paste("Hessian \n -------------------------- \n"))
-    print(derivative.2)
-    cat(paste("-------------------------- \n"))
-    
-    B_full = B_full + alpha*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
+    B_full = B_full - eta*matrix((inv(derivative.2)) %*% derivative.1, nrow=(ncol(df)-1), ncol = K-1) #put into matrix since it prints out as array
     # B_full = cbind(0, B_full)
     
     if (!is.null(exact)){
@@ -194,18 +203,23 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
       temp_df <- rbind(temp_df, error)
     }
     else{
-      temp_df[1,] <- B_full
+      temp_df <- rbind(B_full)
     }
 
   }
-  print((temp_df))
-  return(B_full)
+  if(DEBUG){
+    print((temp_df))
+  }
+
+  plot(1:length(temp_df$error), temp_df$error, col = "red")
+  print(B_full)
+  return(temp_df)
 }
 
 # Testing
 K <- 2 # Number of classes
 d <- 5 # Number of columns/features
-n <- 200 # Number of rows
+n <- 5000 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
 # targets <- runif(d+1, -2, 2)
@@ -249,7 +263,7 @@ df <- cbind(x,yTargets)
 # init <- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d))  #K by d dimensional matrix
 # init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 init <- matrix(rep(-1), ncol = K-1, nrow = d)
-
+# init <- yBetas + rnorm(length(yBetas), 0, 1)/1
 print(init)
 
 library(pracma)
@@ -259,7 +273,18 @@ library(pracma)
 # print(cat("OUT: ", (softmax(df, K, init))))
 
 # print(df)
-print(softmax(df, K, init, exact = yBetas))
+# print(softmax(df, K, init, exact = yBetas))
+etas = c(.1, .05, .01, .001, .0001)
+etas = rep(10^(-2), 5)
+errors = c()
+for(eta.i in etas){
+  df.errors = softmax(df, K, init, eta = eta.i, exact = yBetas, DEBUG = FALSE)$Error # Get the error column
+  error.i = df.errors[length(df.errors)]
+  # print(error.i)
+  errors = c(errors, error.i)
+}
+print(softmax(df, K, init, eta = eta.i, exact = yBetas, DEBUG = FALSE))
+print(errors)
 # df = softmax(df, K, init, exact = yBetas)
 #exact values
 print(yBetas)
