@@ -106,6 +106,6 @@ init=betas+rnorm(p+1,0,1)
 
 # print(init)
 library(pracma)
-print(tail(sgd2(df, eta = .01, num_iter = 1000, batch_num = 10)))
+print(tail(sgd_batched(df, eta = .01, num_iter = 1000, batch_num = 10)))
 #exact values
 print(betas)
