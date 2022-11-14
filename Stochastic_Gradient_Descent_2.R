@@ -44,7 +44,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
     temp_df[1,] <- thetas_prev
   }
   
-
+  Dh <- thetas_prev;
   while (epoch <= num_iter){
     batch <- df[sample(nrow(df), size = 1, replace=FALSE),]  # take a random batch from the data
 
@@ -56,15 +56,23 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
 
     PHI <- X
 
-    exponent <- thetas_prev %*% PHI #calculate the exponent of the logistic function
+    exponent <- t(thetas_prev) %*% PHI #calculate the exponent of the logistic function
 
     PI <- exp(exponent)/(1+exp(exponent)) #logistic function
+    
+    D <- -log((PI^Y)*(1-PI)^(1-Y))
 
     # Dh <- Dh + (PI %*% PHI) - (Y * PHI)  #recalculate gradients using data
     
     # Dh <- Dh + PHI * drop(Y - PI)  #recalculate gradients using data
     
-    Dh <- as.numeric((1 / (1 + exp(-(PHI %*% thetas_prev)))- Y)) * PHI
+    # Dh <- as.numeric( exp(PHI %*% thetas_prev) / (1 + exp(PHI %*% thetas_prev)) - Y) * PHI
+    
+    Dh <- as.numeric( exp(t(thetas_prev) %*% PHI) / (1 + exp(t(thetas_prev) %*% PHI)) - Y) * PHI
+    
+    # D <-   
+    
+    # print(Dh)
 
     thetas_prev <- thetas_prev - eta * Dh   #recalculate weights using updated gradient
     # print(thetas_prev)
@@ -79,7 +87,7 @@ sgd2 <- function(df, init = as.vector(rep(1, ncol(df)-1)), eta = .001, num_iter 
       temp_df <- rbind(temp_df, c(thetas_prev, error))
     }
     else{
-      # need to drop extra dimension (don't ask)
+      # need to drop extra dimension
       temp_df <- rbind(temp_df, drop(thetas_prev))
     }
   } #end while
@@ -97,14 +105,19 @@ hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
 p.true <- hc(x %*% betas)
 y <- rbinom(n, 1, p.true)
 df <- cbind(x,y)
-# print(df)
 init=betas+rnorm(p+1,0,1)
 
 # Normalize the data
 # df <- min_max_norm(df)
 
 # print(init)
-library(pracma)
-print(tail(sgd2(df, eta = .1, num_iter = 1000, exact = betas)))
+# library(pracma)
+print(head(df))
+
+out_sgd2 <- sgd2(df, eta = .1, num_iter = 1000, exact = betas)
+
+# Estimated values
+print(tail(out_sgd2))
+
 #exact values
 print(betas)

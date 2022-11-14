@@ -5,7 +5,7 @@
 #' @param num_iter number of iterations
 #' @param batch_num number of data rows in the batch (specifically for SGD)
 #' @return theta
-sgd <- function(df, eta = .005, num_iter = 50, batch_num = 10){
+sgd <- function(df, eta = .001, num_iter = 50, batch_num = 10){
   # TODO: check if batch_num is less than number of rows in df
   # TODO: make error vector
   w = as.vector(rep(1, ncol(df)-1))  # initializing weights

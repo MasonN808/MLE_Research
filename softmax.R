@@ -9,8 +9,6 @@ prob_softmax <- function(x, Beta, sum){
   return(out)
 }
 
-
-
 #' Indicator Function
 #' 
 #' @param y a number
@@ -26,24 +24,6 @@ ind_func <- function(y,c){
   return(out)
 }
 
-# Just use the L2 norm
-#' #' Accuracy Function
-#' #' 
-#' #' @param input a vector, B_full
-#' #' @param expected an expected vector for B_full
-#' #' @return 
-#' accuracy <- function(input, expected){
-#'   if (y == c){
-#'     out = 1
-#'   }
-#'   else{
-#'     out = 0
-#'   }
-#'   return(out)
-#' }
-
-
-
 #' Implementation of softmax regression
 #' 
 #' @param df A data frame.
@@ -53,11 +33,9 @@ ind_func <- function(y,c){
 #' @return theta
 softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num = nrow(df), eta = .01, exact = NULL, DEBUG = FALSE){
   B_full = init
-  # initialize a data frame to store betas after every iteration
   if (!is.null(exact)){
     # Add error column
-    # m <- matrix(NA, ncol = ncol(df), nrow = 1)
-    m <- matrix(NA, ncol = 1, nrow = 1)
+    m <- matrix(NA, ncol = ncol(df), nrow = 1)
   }
   else{
     m <- matrix(NA, ncol = ncol(df)-1, nrow = 1)
@@ -67,23 +45,21 @@ softmax <- function(df, K, init = matrix(1, ncol(df)-1, nrow(df)-1), batch_num =
 
   names <- c()
   # make a vector of names for columns
-  # for (i in 2:ncol(df)-2) {
-  #   names <- append(names, paste0("Betas.", i))
-  # }
   if (!is.null(exact)){
-    ## Add error column
+    # Add error column
     names <- append(names, "error")
   }
+  
   # assign the names vector to the column names of temp data frame
-  # print(c(ncol(temp_df), length(names)))
   colnames(temp_df) <- names
 
   if (!is.null(exact)){
-    ## Add error
+    # Add error
     error = 0
     for (i in 1: length(B_full[1,])) {
       error = error + norm_L2(B_full[,i] - exact[,i])
     }
+    
     error = error/length(B_full[1,])
     # temp_df <- na.omit(rbind(temp_df, c(B_full, error)))
     temp_df[1,] <- error
@@ -222,18 +198,9 @@ d <- 5 # Number of columns/features
 n <- 5000 # Number of rows
 x <- matrix(rnorm(n * (d-1)), n, d-1)
 x <- cbind(1,x)
-# targets <- runif(d+1, -2, 2)
-# hc <- function(x) 1 /(1 + exp(-x)) # inverse canonical link
-# d.true <- hc(x %*% targets)
-
-
-# yBetas<- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)) # K x d Dimensional matrix; Do a normal distribution across Betas we want to estimate
-# yBetas<-matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
-
 
 yBetas <- matrix(rep(1), ncol = K-1, nrow = d)
-# yBetas[d,K] <- 1000
-# print(yBetas)
+
 
 yTargets <- c()
 for(i in 1:n){ # Looping through each row in the dataset
@@ -253,27 +220,14 @@ for(i in 1:n){ # Looping through each row in the dataset
   yTargets <- c(yTargets, which(p.k.vec == max(p.k.vec))-1) # find the index with the max probability and minus 1 for indexing
 }
 
-# print(yTargets)
-
-# y <- floor(runif(n, min = 0, max = K)) # produce n number of uniformly distributed numbers between 0 and 6 (given floor)
-
 df <- cbind(x,yTargets)
 
-# init <- cbind(rep(0, nrow(df)-1), matrix(targets+rnorm(d+1,0,1), ncol = K, nrow = d+1))  #K by d dimensional matrix
-# init <- cbind(rep(0, d), matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d))  #K by d dimensional matrix
-# init <- matrix(rnorm((K-1)*(d)), ncol = K-1, nrow = d)
 init <- matrix(rep(-1), ncol = K-1, nrow = d)
-# init <- yBetas + rnorm(length(yBetas), 0, 1)/1
+
 print(init)
 
 library(pracma)
-# print(df)
-# print(cat("targets: ", targets))
-# print(cat("test: ", sum(targets+rnorm(p+1,0,1))))
-# print(cat("OUT: ", (softmax(df, K, init))))
 
-# print(df)
-# print(softmax(df, K, init, exact = yBetas))
 etas = c(.1, .05, .01, .001, .0001)
 etas = rep(10^(-2), 5)
 errors = c()
@@ -283,9 +237,9 @@ for(eta.i in etas){
   # print(error.i)
   errors = c(errors, error.i)
 }
-print(softmax(df, K, init, eta = eta.i, exact = yBetas, DEBUG = FALSE))
-print(errors)
-# df = softmax(df, K, init, exact = yBetas)
+print(tail(softmax(df, K, init, eta = eta.i, exact = yBetas, DEBUG = FALSE)))
+# print(errors)
+
 #exact values
-print(yBetas)
+# print(yBetas)
 

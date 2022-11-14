@@ -85,4 +85,5 @@ init=betas+rnorm(p+1,0,1)
 print(head(df))
 
 print(tail(trunc_stochastic_newton_algo(df, 10^(-10), .49, init)))
+
 print(betas)
